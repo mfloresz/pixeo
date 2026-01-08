@@ -1,0 +1,553 @@
+// src/config/models_data.ts
+// Model configurations ported from original chutes-img-ui/js/models.js
+
+export const MODEL_CONFIGS: any = {
+    'z-image-turbo': {
+        name: 'Z Image Turbo',
+        endpoint: 'https://chutes-z-image-turbo.chutes.ai/generate',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 576, max: 2048, default: 1024, step: 64 },
+            height: { min: 576, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 0, max: 5, default: 0, step: 0.1 },
+            num_inference_steps: { min: 1, max: 100, default: 9, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null }
+        },
+        resolutions: [
+            { id: '1', label: '1024x1024 - 1:1', width: 1024, height: 1024 },
+            { id: '2', label: '1152x896 - 9:7', width: 1152, height: 896 },
+            { id: '3', label: '896x1152 - 7:9', width: 896, height: 1152 },
+            { id: '4', label: '1152x864 - 4:3', width: 1152, height: 864 },
+            { id: '5', label: '864x1152 - 3:4', width: 864, height: 1152 },
+            { id: '6', label: '1248x832 - 3:2', width: 1248, height: 832 },
+            { id: '7', label: '832x1248 - 2:3', width: 832, height: 1248 },
+            { id: '8', label: '1280x720 - 16:9', width: 1280, height: 720 },
+            { id: '9', label: '720x1280 - 9:16', width: 720, height: 1280 },
+            { id: '10', label: '1344x576 - 21:9', width: 1344, height: 576 },
+            { id: '11', label: '576x1344 - 9:21', width: 576, height: 1344 },
+            { id: '12', label: '1280x1280 - 1:1', width: 1280, height: 1280 },
+            { id: '13', label: '1440x1120 - 9:7', width: 1440, height: 1120 },
+            { id: '14', label: '1120x1440 - 7:9', width: 1120, height: 1440 },
+            { id: '15', label: '1472x1104 - 4:3', width: 1472, height: 1104 },
+            { id: '16', label: '1104x1472 - 3:4', width: 1104, height: 1472 },
+            { id: '17', label: '1536x1024 - 3:2', width: 1536, height: 1024 },
+            { id: '18', label: '1024x1536 - 2:3', width: 1024, height: 1536 },
+            { id: '19', label: '1536x864 - 16:9', width: 1536, height: 864 },
+            { id: '20', label: '864x1536 - 9:16', width: 864, height: 1536 },
+            { id: '21', label: '1680x720 - 21:9', width: 1680, height: 720 },
+            { id: '22', label: '720x1680 - 9:21', width: 720, height: 1680 },
+            { id: '23', label: '1536x1536 - 1:1', width: 1536, height: 1536 },
+            { id: '24', label: '1728x1344 - 9:7', width: 1728, height: 1344 },
+            { id: '25', label: '1344x1728 - 7:9', width: 1344, height: 1728 },
+            { id: '26', label: '1728x1296 - 4:3', width: 1728, height: 1296 },
+            { id: '27', label: '1296x1728 - 3:4', width: 1296, height: 1728 },
+            { id: '28', label: '1872x1248 - 3:2', width: 1872, height: 1248 },
+            { id: '29', label: '1248x1872 - 2:3', width: 1248, height: 1872 },
+            { id: '30', label: '2048x1152 - 16:9', width: 2048, height: 1152 },
+            { id: '31', label: '1152x2048 - 9:16', width: 1152, height: 2048 },
+            { id: '32', label: '2016x864 - 21:9', width: 2016, height: 864 }
+        ]
+    },
+
+    'hunyuan-image-3': {
+        name: 'Hunyuan Image 3',
+        endpoint: 'https://chutes-hunyuan-image-3.chutes.ai/generate',
+        payloadFormat: 'flat',
+        sizeParam: 'size',
+        supportsAspectRatio: true,
+        parameterMapping: {
+            steps: 'steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            steps: { min: 10, max: 100, default: 50, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            size: { default: 'auto' }
+        }
+    },
+
+    'qwen-image': {
+        name: 'Qwen Image',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'qwen-image',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 1, max: 50, default: 50, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            negative_prompt: { default: 'Low resolution, poor image quality, limb deformities, finger deformities, oversaturated visuals, wax-like appearance, lack of facial detail, excessive smoothness, AI-generated aesthetic. Chaotic composition. Blurred and distorted text.' }
+        },
+        resolutions: [
+            { id: '1', label: '1328x1328 - 1:1', width: 1328, height: 1328 },
+            { id: '2', label: '1664x928 - 16:9', width: 1664, height: 928 },
+            { id: '3', label: '928x1664 - 9:16', width: 928, height: 1664 },
+            { id: '4', label: '1472x1104 - 4:3', width: 1472, height: 1104 },
+            { id: '5', label: '1104x1472 - 3:4', width: 1104, height: 1472 },
+            { id: '6', label: '1584x1056 - 3:2', width: 1584, height: 1056 },
+            { id: '7', label: '1056x1584 - 2:3', width: 1056, height: 1584 }
+        ]
+    },
+
+    'qwen-image-2512': {
+        name: 'Qwen Image 2512',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'Qwen-Image-2512',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 1, max: 50, default: 50, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            negative_prompt: { default: 'Low resolution, poor image quality, limb deformities, finger deformities, oversaturated visuals, wax-like appearance, lack of facial detail, excessive smoothness, AI-generated aesthetic. Chaotic composition. Blurred and distorted text.' }
+        },
+        resolutions: [
+            { id: '1', label: '1328x1328 - 1:1', width: 1328, height: 1328 },
+            { id: '2', label: '1664x928 - 16:9', width: 1664, height: 928 },
+            { id: '3', label: '928x1664 - 9:16', width: 928, height: 1664 },
+            { id: '4', label: '1472x1104 - 4:3', width: 1472, height: 1104 },
+            { id: '5', label: '1104x1472 - 3:4', width: 1104, height: 1472 },
+            { id: '6', label: '1584x1056 - 3:2', width: 1584, height: 1056 },
+            { id: '7', label: '1056x1584 - 2:3', width: 1056, height: 1584 }
+        ]
+    },
+
+    'hidream': {
+        name: 'HiDream',
+        endpoint: 'https://chutes-hidream.chutes.ai/generate',
+        payloadFormat: 'flat',
+        resolutionFormat: 'x',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        message: {
+            type: 'warning',
+            text: '⚠️ Note: Width and height dimensions for most resolutions are currently swapped due to a bug on Chutes server side.'
+        },
+        params: {
+            resolution: {
+                options: ['1024x1024', '768x1360', '1360x768', '880x1168', '1168x880', '1248x832', '832x1248'],
+                default: '1024x1024'
+            },
+            guidance_scale: { min: 0, max: 10, default: 5, step: 0.1 },
+            num_inference_steps: { min: 5, max: 75, default: 50, step: 1 },
+            seed: { min: 0, max: 100000000, default: null }
+        },
+        resolutions: [
+            { id: '1', label: '1024x1024 - 1:1', width: 1024, height: 1024, value: '1024x1024' },
+            { id: '2', label: '768x1360 - 9:16', width: 768, height: 1360, value: '768x1360' },
+            { id: '3', label: '1360x768 - 16:9', width: 1360, height: 768, value: '1360x768' },
+            { id: '4', label: '880x1168 - 3:4', width: 880, height: 1168, value: '880x1168' },
+            { id: '5', label: '1168x880 - 4:3', width: 1168, height: 880, value: '1168x880' },
+            { id: '6', label: '1248x832 - 3:2', width: 1248, height: 832, value: '1248x832' },
+            { id: '7', label: '832x1248 - 2:3', width: 832, height: 1248, value: '832x1248' }
+        ]
+    },
+
+    'flux-dev': {
+        name: 'FLUX.1 Dev',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'FLUX.1-dev',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 1, max: 30, default: 30, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null }
+        }
+    },
+
+    'juggernaut-xl': {
+        name: 'JuggernautXL',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'JuggernautXL',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 1, max: 50, default: 25, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            negative_prompt: { default: '' }
+        }
+    },
+
+    'chroma': {
+        name: 'Chroma',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'chroma',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 200, max: 2048, default: 1024, step: 64 },
+            height: { min: 200, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 7.5, default: 4.5, step: 0.1 },
+            num_inference_steps: { min: 5, max: 50, default: 30, step: 1 },
+            seed: { min: 0, max: null, default: 0 }
+        }
+    },
+
+    'ilust-mix': {
+        name: 'iLustMix',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'iLustMix',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 1, max: 50, default: 25, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            negative_prompt: { default: '' }
+        }
+    },
+
+    'neta-lumina': {
+        name: 'Neta Lumina',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'neta-lumina',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 768, max: 2048, default: 1024, step: 64 },
+            height: { min: 768, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 20, max: 50, default: 30, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            negative_prompt: { default: 'blurry, worst quality, low quality' }
+        }
+    },
+
+    'wan2.1-14b': {
+        name: 'Wan2.1 14b',
+        endpoint: 'https://chutes-wan2-1-14b.chutes.ai/text2image',
+        payloadFormat: 'flat',
+        resolutionFormat: 'star',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'steps'
+        },
+        params: {
+            resolution: {
+                options: ['1280*720', '720*1280', '832*480', '480*832', '1024*1024'],
+                default: '832*480'
+            },
+            sample_shift: { min: 1, max: 7, default: null, step: 0.1 },
+            guidance_scale: { min: 1, max: 7.5, default: 5, step: 0.1 },
+            seed: { min: 0, max: null, default: null },
+            negative_prompt: { default: 'Vibrant colors, overexposed, static, blurry details, subtitles, style, artwork, painting, picture, still, overall grayish, worst quality, low quality, JPEG compression artifacts, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn face, deformed, disfigured, malformed limbs, fused fingers, motionless image, cluttered background, three legs, many people in the background, walking backwards, slow motion' }
+        },
+        resolutions: [
+            { id: '1', label: '1280x720 - 16:9', width: 1280, height: 720, value: '1280*720' },
+            { id: '2', label: '720x1280 - 9:16', width: 720, height: 1280, value: '720*1280' },
+            { id: '3', label: '832x480 - 1.73:1', width: 832, height: 480, value: '832*480' },
+            { id: '4', label: '480x832 - 1:1.73', width: 480, height: 832, value: '480*832' },
+            { id: '5', label: '1024x1024 - 1:1', width: 1024, height: 1024, value: '1024*1024' }
+        ]
+    },
+
+    'nova-anime3d-xl': {
+        name: 'Nova Anime3d Xl',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'nova-anime3d-xl',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 1, max: 50, default: 25, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            negative_prompt: { default: '' }
+        }
+    },
+
+    'illustrij': {
+        name: 'Illustrij',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'Illustrij',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 1, max: 50, default: 25, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            negative_prompt: { default: '' }
+        }
+    },
+
+    'orphic-lora': {
+        name: 'Orphic Lora',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'orphic-lora',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            pixel_scale: { min: 0, max: 1, default: 0.7, step: 0.01 },
+            turbo_scale: { min: 0, max: 1, default: 0.7, step: 0.01 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 1, max: 30, default: 10, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null }
+        }
+    },
+
+    'animij': {
+        name: 'Animij',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'Animij',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 1, max: 50, default: 25, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            negative_prompt: { default: '' }
+        }
+    },
+
+    'hassaku-xl': {
+        name: 'HassakuXL',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'HassakuXL',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 1, max: 50, default: 25, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            negative_prompt: { default: '' }
+        }
+    },
+
+    'nova-cartoon-xl': {
+        name: 'Nova Cartoon Xl',
+        endpoint: 'https://image.chutes.ai/generate',
+        modelName: 'nova-cartoon-xl',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'guidance_scale',
+            steps: 'num_inference_steps'
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            guidance_scale: { min: 1, max: 20, default: 7.5, step: 0.1 },
+            num_inference_steps: { min: 1, max: 50, default: 25, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            negative_prompt: { default: '' }
+        }
+    }
+};
+
+export const VIDEO_MODEL_CONFIGS: any = {
+    'wan2.1-14b-video': {
+        name: 'Wan2.1 14b Video',
+        payloadFormat: 'flat',
+        resolutionFormat: 'star',
+        includeResolutionIn: ['text2video'],
+        endpoints: {
+            text2video: 'https://chutes-wan2-1-14b.chutes.ai/text2video',
+            image2video: 'https://chutes-wan2-1-14b.chutes.ai/image2video'
+        },
+        params: {
+            resolution: {
+                options: ['1280*720', '720*1280', '832*480', '480*832', '1024*1024'],
+                default: '832*480'
+            },
+            fps: { min: 16, max: 60, default: 24, step: 1 },
+            steps: { min: 10, max: 30, default: 25, step: 1 },
+            frames: { min: 81, max: 241, default: 81, step: 1 },
+            sample_shift: { min: 1, max: 7, default: null, step: 0.1 },
+            guidance_scale: { min: 1, max: 7.5, default: 5, step: 0.1 },
+            seed: { min: 0, max: null, default: 42 },
+            negative_prompt: { default: 'Vibrant colors, overexposed, static, blurry details, subtitles, style, artwork, painting, picture, still, overall grayish, worst quality, low quality, JPEG compression artifacts, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn face, deformed, disfigured, malformed limbs, fused fingers, motionless image, cluttered background, three legs, many people in the background, walking backwards, slow motion' }
+        },
+        resolutions: [
+            { id: '1', label: '1280x720 - 16:9', width: 1280, height: 720, value: '1280*720' },
+            { id: '2', label: '720x1280 - 9:16', width: 720, height: 1280, value: '720*1280' },
+            { id: '3', label: '832x480 - 1.73:1', width: 832, height: 480, value: '832*480' },
+            { id: '4', label: '480x832 - 1:1.73', width: 480, height: 832, value: '480*832' },
+            { id: '5', label: '1024x1024 - 1:1', width: 1024, height: 1024, value: '1024*1024' }
+        ]
+    },
+
+    'wan-2-2-i2v-14b-fast': {
+        name: 'Wan 2.2 I2V 14B Fast',
+        payloadFormat: 'flat',
+        resolutionFormat: 'enum',
+        includeResolutionIn: ['image2video'],
+        supportedModes: ['image2video'],
+        endpoints: {
+            image2video: 'https://chutes-wan-2-2-i2v-14b-fast.chutes.ai/generate'
+        },
+        imageInput: {
+            type: 'single',
+            field: 'image',
+            hint: 'Upload a single source image (URL or base64)'
+        },
+        params: {
+            resolution: {
+                options: ['480p', '720p'],
+                default: '480p'
+            },
+            fps: { min: 16, max: 24, default: 16, step: 1 },
+            fast: { type: 'boolean', default: true },
+            seed: { min: 0, max: null, default: null },
+            frames: { min: 21, max: 140, default: 81, step: 1 },
+            guidance_scale: { min: 0, max: 10, default: 1, step: 0.1 },
+            guidance_scale_2: { min: 0, max: 10, default: 1, step: 0.1 },
+            negative_prompt: { default: '色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走' }
+        },
+        resolutions: [
+            { id: '1', label: '480p', value: '480p' },
+            { id: '2', label: '720p', value: '720p' }
+        ]
+    }
+};
+
+export const EDIT_MODEL_CONFIGS: any = {
+    'qwen-image-edit-2509': {
+        name: 'Qwen Image Edit 2509',
+        endpoint: 'https://chutes-qwen-image-edit-2509.chutes.ai/generate',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'true_cfg_scale',
+            steps: 'num_inference_steps'
+        },
+        imageInput: {
+            type: 'multiple',
+            field: 'image_b64s',
+            maxItems: 3,
+            minItems: 1
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            true_cfg_scale: { min: 0, max: 10, default: 4, step: 0.1 },
+            num_inference_steps: { min: 5, max: 100, default: 40, step: 1 },
+            seed: { min: 0, max: 4294967295, default: null },
+            negative_prompt: { default: '' }
+        }
+    },
+
+    'qwen-image-edit-2511': {
+        name: 'Qwen Image Edit 2511',
+        endpoint: 'https://chutes-qwen-image-edit-2511.chutes.ai/generate',
+        payloadFormat: 'flat',
+        parameterMapping: {
+            cfgScale: 'true_cfg_scale',
+            steps: 'num_inference_steps'
+        },
+        imageInput: {
+            type: 'multiple',
+            field: 'image_b64s',
+            maxItems: 3,
+            minItems: 1
+        },
+        params: {
+            width: { min: 128, max: 2048, default: 1024, step: 64 },
+            height: { min: 128, max: 2048, default: 1024, step: 64 },
+            true_cfg_scale: { min: 0, max: 10, default: 4, step: 0.1 },
+            num_inference_steps: { min: 5, max: 100, default: 40, step: 1 },
+            seed: { min: 0, max: 4294967295, default: 42 },
+            negative_prompt: { default: '' }
+        }
+    }
+};
+
+export const TTS_MODEL_CONFIGS: any = {
+    'kokoro': {
+        name: 'Kokoro',
+        endpoint: 'https://chutes-kokoro.chutes.ai/speak',
+        payloadFormat: 'flat',
+        params: {
+            text: { required: true },
+            speed: { min: 0.1, max: 3, step: 0.1, default: 1 },
+            voice: {
+                type: 'enum',
+                options: [
+                    'af_heart', 'af_alloy', 'af_aoede', 'af_bella', 'af_jessica', 'af_kore', 'af_nicole', 'af_nova', 'af_river', 'af_sarah', 'af_sky',
+                    'am_adam', 'am_echo', 'am_eric', 'am_fenrir', 'am_liam', 'am_michael', 'am_onyx', 'am_puck', 'am_santa',
+                    'bf_alice', 'bf_emma', 'bf_isabella', 'bf_lily',
+                    'bm_daniel', 'bm_fable', 'bm_george', 'bm_lewis',
+                    'ef_dora', 'em_alex', 'em_santa', 'ff_siwis',
+                    'hf_alpha', 'hf_beta', 'hm_omega', 'hm_psi',
+                    'if_sara', 'im_nicola',
+                    'jf_alpha', 'jf_gongitsune', 'jf_nezumi', 'jf_tebukuro', 'jm_kumo',
+                    'pf_dora', 'pm_alex', 'pm_santa',
+                    'zf_xiaobei', 'zf_xiaoni', 'zf_xiaoxiao', 'zf_xiaoyi', 'zm_yunjian', 'zm_yunxi', 'zm_yunxia', 'zm_yunyang'
+                ],
+                default: 'af_heart'
+            }
+        }
+    },
+
+    'csm-1b': {
+        name: 'CSM 1B',
+        endpoint: 'https://chutes-csm-1b.chutes.ai/speak',
+        payloadFormat: 'flat',
+        params: {
+            text: { required: true },
+            speaker: { min: 0, max: 1, step: 1, default: 1 },
+            max_duration_ms: { min: 1000, max: 60000, step: 500, default: 10000 }
+        }
+    }
+};
