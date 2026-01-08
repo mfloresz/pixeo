@@ -5,6 +5,7 @@ export const MODEL_CONFIGS: any = {
     'z-image-turbo': {
         name: 'Z Image Turbo',
         endpoint: 'https://chutes-z-image-turbo.chutes.ai/generate',
+        accept_optimize_prompt: true,
         payloadFormat: 'flat',
         parameterMapping: {
             cfgScale: 'guidance_scale',
@@ -75,6 +76,7 @@ export const MODEL_CONFIGS: any = {
         name: 'Qwen Image',
         endpoint: 'https://image.chutes.ai/generate',
         modelName: 'qwen-image',
+        accept_optimize_prompt: true,
         payloadFormat: 'flat',
         parameterMapping: {
             cfgScale: 'guidance_scale',
@@ -103,6 +105,7 @@ export const MODEL_CONFIGS: any = {
         name: 'Qwen Image 2512',
         endpoint: 'https://image.chutes.ai/generate',
         modelName: 'Qwen-Image-2512',
+        accept_optimize_prompt: true,
         payloadFormat: 'flat',
         parameterMapping: {
             cfgScale: 'guidance_scale',
@@ -467,6 +470,7 @@ export const EDIT_MODEL_CONFIGS: any = {
     'qwen-image-edit-2509': {
         name: 'Qwen Image Edit 2509',
         endpoint: 'https://chutes-qwen-image-edit-2509.chutes.ai/generate',
+        accept_optimize_prompt: true,
         payloadFormat: 'flat',
         parameterMapping: {
             cfgScale: 'true_cfg_scale',
@@ -491,6 +495,7 @@ export const EDIT_MODEL_CONFIGS: any = {
     'qwen-image-edit-2511': {
         name: 'Qwen Image Edit 2511',
         endpoint: 'https://chutes-qwen-image-edit-2511.chutes.ai/generate',
+        accept_optimize_prompt: true,
         payloadFormat: 'flat',
         parameterMapping: {
             cfgScale: 'true_cfg_scale',

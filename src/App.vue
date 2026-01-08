@@ -122,7 +122,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { Image, Settings, Library, Sun, Moon, Sparkles, Download, Mic, Maximize2 } from 'lucide-vue-next';
-import { Toaster } from 'vue-sonner';
+import Toaster from './components/ui/Toaster.vue';
 import { useConfigStore } from './stores/config';
 import { useHistoryStore } from './stores/history';
 import type { HistoryItem } from './stores/history';
