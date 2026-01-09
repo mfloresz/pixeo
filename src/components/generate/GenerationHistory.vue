@@ -75,10 +75,8 @@
     <div class="w-20 h-20 bg-muted/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
       <Sparkles class="w-10 h-10 opacity-20" />
     </div>
-    <h2 class="text-2xl font-bold text-foreground mb-2">Pixeo Creative Studio</h2>
-    <p class="text-sm max-w-xs mx-auto opacity-60">
-      Tu estudio creativo potenciado por IA. Elige un modelo, escribe tu idea y deja que la magia ocurra.
-    </p>
+    <h2 class="text-2xl font-bold text-foreground mb-2">{{ $t('generate.heroTitle') }}</h2>
+    <p class="text-sm max-w-xs mx-auto opacity-60">{{ $t('generate.heroSubtitle') }}</p>
   </div>
 </template>
 

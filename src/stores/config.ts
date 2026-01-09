@@ -6,11 +6,35 @@ import { ChutesService } from '../services/chutes';
 
 export const useConfigStore = defineStore('config', () => {
     const apiKey = ref(localStorage.getItem('pixeo_api_key') || '');
-    const locale = ref(localStorage.getItem('pixeo_locale') || 'es');
-    const theme = ref(localStorage.getItem('pixeo_theme') || 'dark');
+    const locale = ref(localStorage.getItem('pixeo_locale') || 'en');
+    const theme = ref(localStorage.getItem('pixeo_theme') || 'system');
     const quota = ref(0);
     const used = ref(0);
     const logs = ref<any[]>([]);
+
+    const getSystemTheme = () => {
+        if (typeof window !== 'undefined' && window.matchMedia) {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        return 'dark';
+    };
+
+    const resolveTheme = (val: string) => {
+        if (val === 'system') {
+            return getSystemTheme();
+        }
+        return val;
+    };
+
+    // Watch for system theme changes
+    if (typeof window !== 'undefined' && window.matchMedia) {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', (e) => {
+            if (theme.value === 'system') {
+                document.documentElement.classList.toggle('dark', e.matches);
+            }
+        });
+    }
 
     const refreshQuota = async () => {
         if (!apiKey.value) {
@@ -39,10 +63,11 @@ export const useConfigStore = defineStore('config', () => {
         localStorage.setItem('pixeo_locale', val);
         (i18n.global as any).locale.value = val;
     });
+
     watch(theme, (val) => {
         localStorage.setItem('pixeo_theme', val);
-        document.documentElement.classList.toggle('dark', val === 'dark');
-    });
+        document.documentElement.classList.toggle('dark', resolveTheme(val) === 'dark');
+    }, { immediate: true });
 
     const addLog = (log: any) => {
         logs.value.unshift({ timestamp: new Date(), ...log });

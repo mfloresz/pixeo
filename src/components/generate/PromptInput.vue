@@ -1,5 +1,5 @@
 <template>
-    <div class="flex justify-center mt-4">
+    <div class="flex justify-center">
         <div
             class="p-1 rounded-3xl bg-card border shadow-2xl backdrop-blur-xl bg-card/80 min-w-[900px]"
         >
@@ -106,7 +106,7 @@
                             class="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-all text-xs font-medium text-muted-foreground"
                         >
                             <Settings2 class="w-4 h-4" />
-                            <span>Avanzado</span>
+                            <span>{{ $t('generate.advanced') }}</span>
                         </button>
                     </PopoverTrigger>
                     <PopoverContent class="w-96 max-h-[500px] overflow-y-auto">
@@ -183,25 +183,20 @@
                 >
                     <Switch v-model="shouldOptimize" />
                     <span class="text-xs font-medium text-muted-foreground"
-                        >Optimizar</span
+                        >{{ $t('generate.optimize') }}</span
                     >
                 </div>
 
                 <button
                     @click="historyStore.clearSession"
                     class="p-2 rounded-xl bg-muted hover:bg-destructive/10 hover:text-destructive transition-colors"
-                    title="Limpiar Generaciones"
+                    :title="$t('generate.clearGenerations')"
                 >
                     <BrushCleaning class="w-4 h-4" />
                 </button>
 
                 <div class="flex-1"></div>
 
-                <span
-                    v-if="isGenerating"
-                    class="text-[10px] font-mono text-muted-foreground animate-pulse"
-                    >{{ timer.toFixed(2) }}s</span
-                >
                 <button
                     @click="generate"
                     :disabled="!isValid || isGenerating || !apiKey"
@@ -240,6 +235,7 @@ import { ChutesService } from "../../services/chutes";
 import { optimizePrompt as optimizePromptService } from "../../services/promptOptimizer";
 import { toast } from "vue-sonner";
 import { sanitizeBase64 } from "../../lib/utils";
+import { i18n } from "../../i18n";
 import { Switch } from "../ui/switch";
 import {
     Popover,
@@ -266,8 +262,6 @@ const prompt = ref("");
 const shouldOptimize = ref(false);
 const isGenerating = ref(false);
 const sourceImages = ref<{ url: string; b64: string }[]>([]);
-const timer = ref(0);
-let timerInterval: any = null;
 
 const isValid = computed(() => {
     if (mode.value === "text2speech") return prompt.value.length > 0;
@@ -311,8 +305,6 @@ async function generate() {
     if (!isValid.value || isGenerating.value || !apiKey.value) return;
 
     isGenerating.value = true;
-    timer.value = 0;
-    timerInterval = setInterval(() => (timer.value += 0.05), 50);
 
     try {
         const service = new ChutesService(apiKey.value);
@@ -329,15 +321,15 @@ async function generate() {
                 );
                 configStore.addLog({
                     type: mode.value,
-                    message: `[${model.name}] Prompt optimizado`,
+                    message: i18n.t('logs.promptOptimized', { model: model.name }),
                 });
             } catch (err: any) {
                 toast.warning(
-                    `Optimización fallida, usando prompt original: ${err.message}`,
+                    i18n.t('logs.optimizationFailed', { error: err.message }),
                 );
                 configStore.addLog({
                     type: mode.value,
-                    message: `Optimización fallida: ${err.message}`,
+                    message: i18n.t('logs.optimizationFailed', { error: err.message }),
                     warning: true,
                 });
             }
@@ -388,7 +380,7 @@ async function generate() {
 
         configStore.addLog({
             type: mode.value,
-            message: `[${model.name}] Enviando petición a: ${endpoint}`,
+            message: i18n.t('logs.sendingRequest', { model: model.name, endpoint }),
             details: JSON.parse(JSON.stringify(payload, redactor)),
         });
 
@@ -412,10 +404,10 @@ async function generate() {
             blob,
         );
 
-        toast.success("Generación completada!");
+        toast.success($t('generate.success'));
         configStore.addLog({
             type: mode.value,
-            message: `Generación exitosa: ${model.name}`,
+            message: i18n.t('logs.generationSuccess', { model: model.name }),
         });
         configStore.refreshQuota();
     } catch (err: any) {
@@ -428,12 +420,10 @@ async function generate() {
         });
     } finally {
         isGenerating.value = false;
-        clearInterval(timerInterval);
     }
 }
 
 onUnmounted(() => {
-    if (timerInterval) clearInterval(timerInterval);
     sourceImages.value.forEach((img) => URL.revokeObjectURL(img.url));
 });
 </script>

@@ -28,7 +28,7 @@
         <div class="flex items-center gap-4">
           <!-- Quota Display -->
           <div v-if="apiKey && quota > 0" class="hidden md:flex flex-col items-end text-[10px] text-muted-foreground mr-2">
-            <span class="font-mono">{{ used }} / {{ quota }} usage</span>
+            <span class="font-mono">{{ $t('common.usageQuota', { used, quota }) }}</span>
             <div class="w-24 h-1 bg-muted rounded-full overflow-hidden mt-1">
               <div 
                 class="bg-primary h-full transition-all duration-500" 
@@ -36,15 +36,16 @@
               />
             </div>
           </div>
-          <button @click="toggleTheme" class="p-2 rounded-full hover:bg-muted transition-colors">
+          <button @click="toggleTheme" class="p-2 rounded-full hover:bg-muted transition-colors" :title="$t('settings.theme')">
             <Sun v-if="theme === 'dark'" class="w-5 h-5" />
-            <Moon v-else class="w-5 h-5" />
+            <Moon v-else-if="theme === 'light'" class="w-5 h-5" />
+            <Monitor v-else class="w-5 h-5" />
           </button>
         </div>
       </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8 md:px-8 min-h-[calc(100vh-4rem)]">
+    <main class="container mx-auto px-4 py-8 md:px-8 min-h-[calc(100vh-4rem)] pb-32">
       <Transition name="fade" mode="out-in">
         <div v-if="activeTab === 'generate'" key="generate" class="h-full flex flex-col gap-8">
           <!-- Generation History -->
@@ -53,7 +54,7 @@
           </div>
 
           <!-- Floating Input Area -->
-          <div class="max-w-3xl mx-auto w-full sticky bottom-8 transition-all duration-500 ease-in-out">
+          <div class="max-w-3xl mx-auto w-full fixed bottom-0 left-0 right-0 px-4 md:px-8 pb-4 transition-all duration-500 ease-in-out z-40">
             <PromptInput />
           </div>
         </div>
@@ -61,7 +62,7 @@
         <div v-else-if="activeTab === 'library'" key="library">
           <div class="flex items-center justify-between mb-8">
             <h1 class="text-3xl font-bold tracking-tight">{{ $t('common.library') }}</h1>
-            <span class="text-xs font-mono text-muted-foreground">{{ items.length }} items</span>
+            <span class="text-xs font-mono text-muted-foreground">{{ $t('common.itemCount', { count: items.length }) }}</span>
           </div>
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             <LibraryItem v-for="item in items" :key="item.id" :item="item" @zoom="openZoom" />
@@ -90,7 +91,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { Image, Settings, Library, Sun, Moon, Download } from 'lucide-vue-next';
+import { Image, Settings, Library, Sun, Moon, Monitor, Download } from 'lucide-vue-next';
 import Toaster from './components/ui/Toaster.vue';
 import { useConfigStore } from './stores/config';
 import { useHistoryStore } from './stores/history';
@@ -148,11 +149,14 @@ function downloadItem(blobUrl: string | null, id?: string) {
 }
 
 function toggleTheme() {
-  configStore.theme = configStore.theme === 'dark' ? 'light' : 'dark';
+    const themes = ['dark', 'light', 'system'];
+    const currentIndex = themes.indexOf(configStore.theme);
+    configStore.theme = themes[(currentIndex + 1) % themes.length];
 }
 
 onMounted(() => {
   configStore.theme = configStore.theme; // Trigger watcher
+  configStore.locale = configStore.locale; // Sync locale from localStorage
   historyStore.initDB();
   configStore.refreshQuota();
 });

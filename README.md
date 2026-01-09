@@ -1,103 +1,120 @@
 # Pixeo
 
-Una aplicación web moderna para generar imágenes, editar imágenes y crear videos usando la plataforma de Chutes AI. Construida con Vue 3, TypeScript y Tailwind CSS.
+A modern web application for generating images, editing images, and creating videos using the Chutes AI platform. Built with Vue 3, TypeScript, and Tailwind CSS.
 
-## ✨ Características
+> **Inspiration**: This project is based on the original idea from [chutes-img-ui](https://github.com/MagicGoddess/chutes-img-ui).
 
-- **Generación de Imágenes**: Crea imágenes de alta calidad usando modelos avanzados de IA como Z Image Turbo, Qwen Image, FLUX.1 Dev, y más.
-- **Edición de Imágenes**: Edita imágenes existentes con modelos especializados como Qwen Image Edit.
-- **Generación de Videos**: Crea videos desde texto o imágenes con modelos como Wan2.1 14B Video.
-- **Texto a Voz**: Convierte texto en audio con modelos TTS como Kokoro y CSM 1B.
-- **Biblioteca Personal**: Almacena y gestiona todos tus contenidos generados localmente.
-- **Interfaz Intuitiva**: Diseño moderno con tres pestañas principales: Generar/Editar, Biblioteca y Configuración.
-- **Soporte Multiidioma**: Disponible en español e inglés.
-- **Almacenamiento Local**: Usa IndexedDB para guardar contenidos sin necesidad de servidor.
-- **Notificaciones en Tiempo Real**: Recibe feedback inmediato sobre el progreso de tus generaciones.
+## 📸 Screenshots
 
-## 🚀 Tecnologías
+| Image Generation | Settings |
+|------------------------|---------------|
+| ![Generate](./docs/images/generate.jpeg) | ![Settings](./docs/images/settings.jpeg) |
 
-- **Framework**: Vue 3 con Composition API
-- **Lenguaje**: TypeScript
+## ✨ Features
+
+- **Image Generation**: Create high-quality images using advanced AI models like Z Image Turbo, Qwen Image, FLUX.1 Dev, and more.
+- **Image Editing**: Edit existing images with specialized models like Qwen Image Edit.
+- **Video Generation**: Create videos from text or images with models like Wan2.1 14B Video.
+- **Text to Speech**: Convert text to audio with TTS models like Kokoro and CSM 1B.
+- **Personal Library**: Store and manage all your generated content locally.
+- **Intuitive Interface**: Modern design with three main tabs: Generate/Edit, Library, and Settings.
+- **Multi-language Support**: Available in Spanish and English.
+- **Local Storage**: Uses IndexedDB to save content without needing a server.
+- **Real-time Notifications**: Receive immediate feedback on your generation progress.
+
+## ⚠️ Project Status
+
+- **Image Generation**: ✅ Fully tested and working
+- **Image Editing**: In development
+- **Video Generation**: In development
+- **Text to Speech**: In development
+
+> **Note**: Some models may be outdated. If you find any model that doesn't work properly, please report it.
+
+## 🚀 Technologies
+
+- **Framework**: Vue 3 with Composition API
+- **Language**: TypeScript
 - **Bundler**: Vite
-- **Estilos**: Tailwind CSS con shadcn/ui components
-- **Estado**: Pinia
-- **Internacionalización**: vue-i18n
-- **Iconos**: Lucide Vue Next
-- **Notificaciones**: vue-sonner
-- **Almacenamiento**: IndexedDB con idb
-- **UI Components**: Radix UI con class-variance-authority
+- **Styles**: Tailwind CSS with shadcn/ui components
+- **State Management**: Pinia
+- **Internationalization**: vue-i18n
+- **Icons**: Lucide Vue Next
+- **Notifications**: vue-sonner
+- **Storage**: IndexedDB with idb
+- **UI Components**: Radix UI with class-variance-authority
 
-## 📦 Instalación
+## 📦 Installation
 
-1. Clona el repositorio:
+1. Clone the repository:
 ```bash
-git clone <url-del-repositorio>
+git clone <repository-url>
 cd pixeo
 ```
 
-2. Instala las dependencias:
+2. Install dependencies:
 ```bash
 npm install
-# o
+# or
 bun install
 ```
 
-3. Inicia el servidor de desarrollo:
+3. Start the development server:
 ```bash
 npm run dev
-# o
+# or
 bun run dev
 ```
 
-4. Abre tu navegador en `http://localhost:5173`
+4. Open your browser at `http://localhost:5173`
 
-## 🛠️ Scripts Disponibles
+## 🛠️ Available Scripts
 
-- `npm run dev` - Inicia el servidor de desarrollo
-- `npm run build` - Construye la aplicación para producción
-- `npm run preview` - Vista previa de la build de producción
-- `npm run lint` - Ejecuta ESLint para verificar el código
+- `npm run dev` - Start the development server
+- `npm run build` - Build the application for production
+- `npm run preview` - Preview the production build
+- `npm run lint` - Run ESLint to verify code
 
-## 🎯 Uso
+## 🎯 Usage
 
-### Configuración Inicial
-1. Ve a la pestaña **Configuración**
-2. Ingresa tu API key de Chutes AI
-3. La aplicación verificará automáticamente tu cuota disponible
+### Initial Setup
+1. Go to the **Settings** tab
+2. Enter your Chutes AI API key
+3. The application will automatically verify your available quota
 
-### Generar Contenido
-1. Selecciona la pestaña **Generar/Editar**
-2. Elige el modo: Imagen, Editar, Video o Audio
-3. Selecciona un modelo disponible
-4. Configura la resolución y parámetros avanzados
-5. Escribe tu prompt
-6. Haz clic en "Generar"
+### Generate Content
+1. Select the **Generate/Edit** tab
+2. Choose the mode: Image, Edit, Video, or Audio
+3. Select an available model
+4. Configure resolution and advanced parameters
+5. Write your prompt
+6. Click "Generate"
 
-### Gestionar Biblioteca
-- La pestaña **Biblioteca** muestra todos tus contenidos generados
-- Usa el zoom para ver detalles completos
-- Descarga contenidos individualmente
-- Limpia la sesión actual con el botón de brush
+### Manage Library
+- The **Library** tab shows all your generated content
+- Use zoom to view complete details
+- Download content individually
+- Clear the current session with the brush button
 
-## 🏗️ Arquitectura del Proyecto
+## 🏗️ Project Architecture
 
 ```
 src/
-├── components/          # Componentes Vue reutilizables
-│   ├── generate/        # Componentes para generación
-│   ├── library/         # Componentes de biblioteca
-│   └── settings/        # Componentes de configuración
-├── config/              # Configuraciones de modelos y resoluciones
-├── i18n/                # Archivos de internacionalización
-├── lib/                 # Utilidades y helpers
-├── services/            # Servicios API (Chutes AI)
-├── stores/              # Estado global con Pinia
-└── types/               # Definiciones TypeScript
+├── components/          # Reusable Vue components
+│   ├── generate/        # Generation components
+│   ├── library/         # Library components
+│   └── settings/        # Settings components
+├── config/              # Model and resolution configurations
+├── i18n/                # Internationalization files
+├── lib/                 # Utilities and helpers
+├── services/            # API services (Chutes AI)
+├── stores/              # Global state with Pinia
+└── types/               # TypeScript definitions
 ```
 
-## 🤖 Modelos Soportados
+## 🤖 Supported Models
 
-### Generación de Imágenes
+### Image Generation
 - Z Image Turbo
 - Hunyuan Image 3
 - Qwen Image / Qwen Image 2512
@@ -108,60 +125,66 @@ src/
 - iLustMix
 - Neta Lumina
 - Wan2.1 14B
-- Y más...
+- And more...
 
-### Edición de Imágenes
+### Image Editing
 - Qwen Image Edit 2509/2511
 
-### Generación de Videos
+### Video Generation
 - Wan2.1 14B Video
 - Wan 2.2 I2V 14B Fast
 
-### Texto a Voz
+### Text to Speech
 - Kokoro
 - CSM 1B
 
-## 🌐 Internacionalización
+## 🌐 Internationalization
 
-La aplicación soporta español e inglés. Los archivos de traducción están en `src/i18n/`.
+The application supports Spanish and English. Translation files are located in `src/i18n/`.
 
-## 📱 Características Técnicas
+## 📱 Technical Features
 
-- **Responsive Design**: Funciona en desktop y móvil
-- **Tema Oscuro/Claro**: Cambia entre modos con el botón en la barra superior
-- **Almacenamiento Offline**: Funciona sin conexión a internet (excepto para generar contenido)
-- **Gestión de Cuota**: Monitorea tu uso de API en tiempo real
-- **Logging Detallado**: Registra todas las operaciones en la configuración
+- **Responsive Design**: Works on desktop and mobile
+- **Dark/Light Theme**: Switch between modes with the button in the top bar
+- **Offline Storage**: Works without internet connection (except for generating content)
+- **Quota Management**: Monitor your API usage in real-time
+- **Detailed Logging**: Log all operations in settings
 
-## 🔧 Desarrollo
+## 🔧 Development
 
-### Estructura de Modelos
-Los modelos se configuran en `src/config/models_data.ts`. Cada modelo incluye:
-- Endpoint de API
-- Parámetros disponibles
-- Resoluciones soportadas
-- Mapeo de parámetros
+### Model Structure
+Models are configured in `src/config/models_data.ts`. Each model includes:
+- API endpoint
+- Available parameters
+- Supported resolutions
+- Parameter mapping
 
-### Añadir Nuevos Modelos
-1. Agrega la configuración en `models_data.ts`
-2. Actualiza las exportaciones en `models.ts`
-3. Reinicia la aplicación
+### Adding New Models
+1. Add the configuration in `models_data.ts`
+2. Update exports in `models.ts`
+3. Restart the application
 
-### Personalización de Resoluciones
-Consulta `src/config/custom_resolutions.md` para aprender cómo definir resoluciones personalizadas.
+### Resolution Customization
+See `src/config/custom_resolutions.md` to learn how to define custom resolutions.
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto es privado y está destinado para uso interno.
+This project is private and intended for internal use.
 
-## 🤝 Contribuir
+## 📞 Support
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -am 'Añade nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
+For technical support or questions, contact the development team.
 
-## 📞 Soporte
+---
 
-Para soporte técnico o preguntas, contacta al equipo de desarrollo.
+## 💡 Technical Note
+
+This application is **vibe coded**, which means it was built quickly and practically to fulfill its purpose. As such, it may not be properly optimized and could contain code that doesn't follow development best practices. Any improvement or optimization is welcome.
+
+## 🤝 Contributing
+
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -am 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Open a Pull Request

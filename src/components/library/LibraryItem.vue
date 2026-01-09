@@ -12,13 +12,13 @@
       
       <!-- Overlay Actions -->
       <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
-        <button @click="$emit('zoom', item)" class="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors" title="Zoom">
+        <button @click="$emit('zoom', item)" class="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors" title="$t('actions.zoom')">
           <Maximize2 class="w-4 h-4" />
         </button>
-        <button @click="download" class="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors" title="Download">
+        <button @click="download" class="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors" title="$t('actions.download')">
           <Download class="w-4 h-4" />
         </button>
-        <button @click="remove" class="p-2 bg-destructive/80 hover:bg-destructive rounded-full text-white transition-colors" title="Delete">
+        <button @click="remove" class="p-2 bg-destructive/80 hover:bg-destructive rounded-full text-white transition-colors" title="$t('actions.delete')">
           <Trash2 class="w-4 h-4" />
         </button>
       </div>

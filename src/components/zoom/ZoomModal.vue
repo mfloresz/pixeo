@@ -40,15 +40,15 @@
         <div class="flex-1 p-6 md:p-8 overflow-y-auto bg-card/50 border-l border-white/5">
           <div class="space-y-6">
             <div>
-              <h3 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Modelo</h3>
+              <h3 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{{ $t('common.model') }}</h3>
               <p class="text-lg font-bold">{{ item.model }}</p>
             </div>
             <div>
-              <h3 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Prompt</h3>
+              <h3 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{{ $t('common.prompt') }}</h3>
               <p class="text-sm leading-relaxed bg-muted/30 p-4 rounded-xl border border-white/5 shadow-inner">{{ item.params.prompt }}</p>
             </div>
             <div v-if="item.params.negative_prompt" class="opacity-60">
-              <h3 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Negative Prompt</h3>
+              <h3 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{{ $t('common.negativePrompt') }}</h3>
               <p class="text-xs leading-relaxed">{{ item.params.negative_prompt }}</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
@@ -60,7 +60,7 @@
             <div class="pt-6 border-t border-white/5">
               <button @click="download" class="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20">
                 <Download class="w-5 h-5" />
-                Descargar Contenido
+                {{ $t('actions.downloadContent') }}
               </button>
             </div>
           </div>

@@ -22,10 +22,19 @@ const messages = {
             loading: 'Loading...',
             success: 'Success',
             error: 'Error',
+            model: 'Model',
+            usageQuota: '{used} / {quota} usage',
+            itemCount: '{count} items',
         },
         generate: {
             placeholder: 'Describe what you want to create...',
             shifting: 'Generating your creation...',
+            advanced: 'Advanced',
+            optimize: 'Optimize',
+            clearGenerations: 'Clear Generations',
+            success: 'Generation completed!',
+            heroTitle: 'Pixeo Creative Studio',
+            heroSubtitle: 'Your AI-powered creative studio. Choose a model, write your idea, and let the magic happen.',
         },
         library: {
             empty: 'No items found in your library.',
@@ -34,6 +43,25 @@ const messages = {
             title: 'Application Settings',
             apiKeyPlaceholder: 'Enter your Chutes API Key',
             logs: 'Activity Logs',
+            theme: 'Theme',
+            clearLogs: 'Clear logs',
+            waitingActivity: 'Waiting for activity...',
+        },
+        actions: {
+            zoom: 'Zoom',
+            download: 'Download',
+            delete: 'Delete',
+            downloadContent: 'Download Content',
+        },
+        logs: {
+            promptOptimized: '[{model}] Prompt optimized',
+            optimizationFailed: 'Optimization failed, using original prompt: {error}',
+            sendingRequest: '[{model}] Sending request to: {endpoint}',
+            generationSuccess: 'Generation successful: {model}',
+        },
+        errors: {
+            quotaFetchFailed: 'Failed to fetch quota',
+            apiError: 'API Error: {status} - {message}',
         }
     },
     es: {
@@ -56,10 +84,19 @@ const messages = {
             loading: 'Cargando...',
             success: 'Éxito',
             error: 'Error',
+            model: 'Modelo',
+            usageQuota: '{used} / {quota} uso',
+            itemCount: '{count} elementos',
         },
         generate: {
             placeholder: 'Describe lo que quieres crear...',
             shifting: 'Generando tu creación...',
+            advanced: 'Avanzado',
+            optimize: 'Optimizar',
+            clearGenerations: 'Limpiar Generaciones',
+            success: '¡Generación completada!',
+            heroTitle: 'Pixeo Creative Studio',
+            heroSubtitle: 'Tu estudio creativo potenciado por IA. Elige un modelo, escribe tu idea y deja que la magia ocurra.',
         },
         library: {
             empty: 'No se encontraron elementos en tu biblioteca.',
@@ -68,13 +105,32 @@ const messages = {
             title: 'Configuración de la Aplicación',
             apiKeyPlaceholder: 'Ingresa tu Clave API de Chutes',
             logs: 'Log de Actividad',
+            theme: 'Tema',
+            clearLogs: 'Limpiar logs',
+            waitingActivity: 'Esperando actividad...',
+        },
+        actions: {
+            zoom: 'Zoom',
+            download: 'Descargar',
+            delete: 'Eliminar',
+            downloadContent: 'Descargar Contenido',
+        },
+        logs: {
+            promptOptimized: '[{model}] Prompt optimizado',
+            optimizationFailed: 'Optimización fallida, usando prompt original: {error}',
+            sendingRequest: '[{model}] Enviando petición a: {endpoint}',
+            generationSuccess: 'Generación exitosa: {model}',
+        },
+        errors: {
+            quotaFetchFailed: 'Error al obtener cuota',
+            apiError: 'Error de API: {status} - {message}',
         }
     }
 };
 
 export const i18n = createI18n({
     legacy: false,
-    locale: 'es',
+    locale: localStorage.getItem('pixeo_locale') || 'en',
     fallbackLocale: 'en',
     messages,
 });

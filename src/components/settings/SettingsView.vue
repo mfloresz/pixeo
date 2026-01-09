@@ -30,16 +30,34 @@
         </div>
       </div>
 
+      <div class="space-y-2">
+        <label class="text-sm font-semibold ml-1">{{ $t('settings.theme') }}</label>
+        <div class="flex bg-muted p-1 rounded-lg">
+          <button 
+            v-for="t in ['dark', 'light', 'system']" 
+            :key="t"
+            @click="theme = t"
+            :class="[
+              'px-3 py-1 text-xs font-bold uppercase rounded-md transition-all flex items-center gap-1',
+              theme === t ? 'bg-background shadow-sm' : 'text-muted-foreground'
+            ]"
+          >
+            <Sun v-if="t === 'dark'" class="w-3 h-3" />
+            <Moon v-else-if="t === 'light'" class="w-3 h-3" />
+            <Monitor v-else class="w-3 h-3" />
+            {{ t === 'system' ? 'auto' : t }}
+          </button>
+        </div>
+      </div>
+
       <div class="space-y-4 pt-4 border-t">
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-bold">{{ $t('settings.logs') }}</h2>
-          <button @click="logs = []" class="text-xs text-muted-foreground hover:text-destructive transition-colors">Limpiar logs</button>
+          <button @click="logs = []" class="text-xs text-muted-foreground hover:text-destructive transition-colors">{{ $t('settings.clearLogs') }}</button>
         </div>
         
         <div class="bg-muted/30 rounded-2xl border min-h-[300px] p-4 font-mono text-xs space-y-2 max-h-[500px] overflow-y-auto">
-          <div v-if="logs.length === 0" class="h-full flex items-center justify-center text-muted-foreground italic">
-            Esperando actividad...
-          </div>
+          <div v-if="logs.length === 0" class="h-full flex items-center justify-center text-muted-foreground italic">{{ $t('settings.waitingActivity') }}</div>
           <div v-for="(log, i) in logs" :key="i" class="border-b border-white/5 pb-2">
             <div class="flex items-start">
               <span class="text-primary shrink-0">{{ formatDate(log.timestamp) }}</span>
@@ -55,10 +73,11 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { Sun, Moon, Monitor } from 'lucide-vue-next';
 import { useConfigStore } from '../../stores/config';
 
 const configStore = useConfigStore();
-const { apiKey, locale, logs } = storeToRefs(configStore);
+const { apiKey, locale, theme, logs } = storeToRefs(configStore);
 
 function formatDate(date: Date) {
   return new Date(date).toLocaleTimeString();
