@@ -1,180 +1,265 @@
 <template>
-  <div class="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
-    <!-- Navbar -->
-    <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md supports-backdrop-filter:bg-background/60">
-      <div class="container flex h-16 items-center justify-between px-4 md:px-8">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-lg shadow-primary/20">P</div>
-          <span class="text-xl font-bold tracking-tight">Pixeo</span>
-        </div>
-        
-        <nav class="flex items-center gap-1 bg-muted/50 p-1 rounded-xl">
-          <button 
-            v-for="tab in tabs" 
-            :key="tab.id"
-            @click="activeTab = tab.id"
-            :class="[
-              'px-4 py-2 text-sm font-medium transition-all rounded-lg flex items-center gap-2',
-              activeTab === tab.id 
-                ? 'bg-background text-foreground shadow-sm' 
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
-            ]"
-          >
-            <component :is="tab.icon" class="w-4 h-4" />
-            {{ $t(`common.${tab.id}`) }}
-          </button>
-        </nav>
+    <div
+        class="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20"
+    >
+        <!-- Navbar -->
+        <header
+            class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md supports-backdrop-filter:bg-background/60"
+        >
+            <div
+                class="container flex h-16 items-center justify-between px-4 md:px-8"
+            >
+                <div class="flex items-center gap-2">
+                    <span class="text-xl font-bold tracking-tight">Pixeo</span>
+                </div>
 
-        <div class="flex items-center gap-4">
-          <!-- Quota Display -->
-          <div v-if="apiKey && quota > 0" class="hidden md:flex flex-col items-end text-[10px] text-muted-foreground mr-2">
-            <span class="font-mono">{{ $t('common.usageQuota', { used, quota }) }}</span>
-            <div class="w-24 h-1 bg-muted rounded-full overflow-hidden mt-1">
-              <div 
-                class="bg-primary h-full transition-all duration-500" 
-                :style="{ width: `${Math.min((used / quota) * 100, 100)}%` }" 
-              />
+                <nav class="flex items-center gap-1 bg-muted/50 p-1 rounded-xl">
+                    <button
+                        v-for="tab in tabs"
+                        :key="tab.id"
+                        @click="activeTab = tab.id"
+                        :class="[
+                            'px-4 py-2 text-sm font-medium transition-all rounded-lg flex items-center gap-2',
+                            activeTab === tab.id
+                                ? 'bg-background text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-muted/80',
+                        ]"
+                    >
+                        <component :is="tab.icon" class="w-4 h-4" />
+                        {{ $t(`common.${tab.id}`) }}
+                    </button>
+                </nav>
+
+                <div class="flex items-center gap-4">
+                    <!-- Quota Display -->
+                    <div
+                        v-if="apiKey && quota > 0"
+                        class="hidden md:flex flex-col items-end text-[10px] text-muted-foreground mr-2"
+                    >
+                        <span class="font-mono">{{
+                            $t("common.usageQuota", { used, quota })
+                        }}</span>
+                        <div
+                            class="w-24 h-1 bg-muted rounded-full overflow-hidden mt-1"
+                        >
+                            <div
+                                class="bg-primary h-full transition-all duration-500"
+                                :style="{
+                                    width: `${Math.min((used / quota) * 100, 100)}%`,
+                                }"
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <button @click="toggleTheme" class="p-2 rounded-full hover:bg-muted transition-colors" :title="$t('settings.theme')">
-            <Sun v-if="theme === 'dark'" class="w-5 h-5" />
-            <Moon v-else-if="theme === 'light'" class="w-5 h-5" />
-            <Monitor v-else class="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-    </header>
+        </header>
 
-    <main class="container mx-auto px-4 py-8 md:px-8 min-h-[calc(100vh-4rem)] pb-32">
-      <Transition name="fade" mode="out-in">
-        <div v-if="activeTab === 'generate'" key="generate" class="h-full flex flex-col gap-8">
-          <!-- Generation History -->
-          <div class="flex-1 flex flex-col rounded-3xl bg-muted/10 border relative overflow-hidden">
-            <GenerationHistory :session-items="sessionItems" @zoom="openZoom" @download="downloadItem" />
-          </div>
+        <main
+            class="container mx-auto px-4 py-8 md:px-8 min-h-[calc(100vh-4rem)] pb-32"
+        >
+            <Transition name="fade" mode="out-in">
+                <div
+                    v-if="activeTab === 'generate'"
+                    key="generate"
+                    class="h-full flex flex-col gap-8"
+                >
+                    <!-- Generation History -->
+                    <div
+                        class="flex-1 flex flex-col rounded-3xl bg-muted/10 border relative overflow-hidden"
+                    >
+                        <GenerationHistory
+                            :session-items="sessionItems"
+                            @zoom="openZoom"
+                            @download="downloadItem"
+                        />
+                    </div>
 
-          <!-- Floating Input Area -->
-          <div class="max-w-3xl mx-auto w-full fixed bottom-0 left-0 right-0 px-4 md:px-8 pb-4 transition-all duration-500 ease-in-out z-40">
-            <PromptInput />
-          </div>
-        </div>
+                    <!-- Floating Input Area -->
+                    <div
+                        class="max-w-3xl mx-auto w-full fixed bottom-0 left-0 right-0 px-4 md:px-8 pb-4 transition-all duration-500 ease-in-out z-40"
+                    >
+                        <PromptInput />
+                    </div>
+                </div>
 
-        <div v-else-if="activeTab === 'library'" key="library">
-          <div class="flex items-center justify-between mb-8">
-            <h1 class="text-3xl font-bold tracking-tight">{{ $t('common.library') }}</h1>
-            <span class="text-xs font-mono text-muted-foreground">{{ $t('common.itemCount', { count: items.length }) }}</span>
-          </div>
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            <LibraryItem v-for="item in items" :key="item.id" :item="item" @zoom="openZoom" />
-            <div v-if="items.length === 0" class="col-span-full py-20 text-center text-muted-foreground">
-              <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <Library class="w-8 h-8 opacity-20" />
-              </div>
-              {{ $t('library.empty') }}
-            </div>
-          </div>
-        </div>
+                <div v-else-if="activeTab === 'library'" key="library">
+                    <div class="flex items-center justify-between mb-8">
+                        <h1 class="text-3xl font-bold tracking-tight">
+                            {{ $t("common.library") }}
+                        </h1>
+                        <div class="flex items-center gap-4">
+                            <span
+                                class="text-xs font-mono text-muted-foreground"
+                                >{{
+                                    $t("common.itemCount", {
+                                        count: items.length,
+                                    })
+                                }}</span
+                            >
+                            <button
+                                v-if="items.length > 0"
+                                @click="clearLibrary"
+                                class="flex items-center gap-2 px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                            >
+                                <Trash2 class="w-4 h-4" />
+                                {{ $t("actions.deleteAll") }}
+                            </button>
+                        </div>
+                    </div>
+                    <div
+                        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+                    >
+                        <LibraryItem
+                            v-for="item in items"
+                            :key="item.id"
+                            :item="item"
+                            @zoom="openZoom"
+                        />
+                        <div
+                            v-if="items.length === 0"
+                            class="col-span-full py-20 text-center text-muted-foreground"
+                        >
+                            <div
+                                class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4"
+                            >
+                                <Library class="w-8 h-8 opacity-20" />
+                            </div>
+                            {{ $t("library.empty") }}
+                        </div>
+                    </div>
+                </div>
 
-        <div v-else-if="activeTab === 'settings'" key="settings">
-           <SettingsView />
-        </div>
-      </Transition>
+                <div v-else-if="activeTab === 'settings'" key="settings">
+                    <SettingsView />
+                </div>
+            </Transition>
 
-      <ZoomModal :show="showZoom" :item="selectedZoomItem" :blobUrl="selectedZoomBlobUrl" @close="closeZoom" @download="downloadItem(selectedZoomBlobUrl, selectedZoomItem?.id)" />
-    </main>
+            <ZoomModal
+                :show="showZoom"
+                :item="selectedZoomItem"
+                :blobUrl="selectedZoomBlobUrl"
+                @close="closeZoom"
+                @download="
+                    downloadItem(selectedZoomBlobUrl, selectedZoomItem?.id)
+                "
+            />
+        </main>
 
-    <!-- Sonner Toaster -->
-    <Toaster />
-  </div>
+        <!-- Sonner Toaster -->
+        <Toaster />
+    </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
-import { storeToRefs } from 'pinia';
-import { Image, Settings, Library, Sun, Moon, Monitor, Download } from 'lucide-vue-next';
-import Toaster from './components/ui/Toaster.vue';
-import { useConfigStore } from './stores/config';
-import { useHistoryStore } from './stores/history';
-import type { HistoryItem } from './stores/history';
-import PromptInput from './components/generate/PromptInput.vue';
-import SettingsView from './components/settings/SettingsView.vue';
-import LibraryItem from './components/library/LibraryItem.vue';
-import ZoomModal from './components/zoom/ZoomModal.vue';
-import GenerationHistory from './components/generate/GenerationHistory.vue';
+import { ref, onMounted, computed, watch } from "vue";
+import { toast } from "vue-sonner";
+import { i18n } from "./i18n";
+const { t } = i18n.global;
+import { storeToRefs } from "pinia";
+import {
+    Image,
+    Settings,
+    Library,
+    Sun,
+    Moon,
+    Monitor,
+    Download,
+    Trash2,
+} from "lucide-vue-next";
+import Toaster from "./components/ui/Toaster.vue";
+import { useConfigStore } from "./stores/config";
+import { useHistoryStore } from "./stores/history";
+import type { HistoryItem } from "./stores/history";
+import PromptInput from "./components/generate/PromptInput.vue";
+import SettingsView from "./components/settings/SettingsView.vue";
+import LibraryItem from "./components/library/LibraryItem.vue";
+import ZoomModal from "./components/zoom/ZoomModal.vue";
+import GenerationHistory from "./components/generate/GenerationHistory.vue";
 
 const configStore = useConfigStore();
 const historyStore = useHistoryStore();
 const { apiKey, theme, quota, used } = storeToRefs(configStore);
 const { items, sessionItems } = storeToRefs(historyStore);
 
-const activeTab = ref('generate');
+async function clearLibrary() {
+    if (items.value.length === 0) return;
+    if (confirm(String(t("actions.deleteAllConfirm")))) {
+        await historyStore.clearAll();
+        toast.success(t("library.deletedAll") || "All items deleted");
+    }
+}
+
+const activeTab = ref("generate");
 const showZoom = ref(false);
 const selectedZoomItem = ref<HistoryItem | null>(null);
 const selectedZoomBlobUrl = ref<string | null>(null);
 
 async function openZoom(item: HistoryItem) {
-  selectedZoomItem.value = item;
-  showZoom.value = true;
-  
-  // Create own blobUrl to persist across tab switches
-  if (selectedZoomBlobUrl.value) URL.revokeObjectURL(selectedZoomBlobUrl.value);
-  const blob = await historyStore.getBlob(item.id);
-  if (blob) {
-    selectedZoomBlobUrl.value = URL.createObjectURL(blob);
-  }
+    selectedZoomItem.value = item;
+    showZoom.value = true;
+
+    // Create own blobUrl to persist across tab switches
+    if (selectedZoomBlobUrl.value)
+        URL.revokeObjectURL(selectedZoomBlobUrl.value);
+    const blob = await historyStore.getBlob(item.id);
+    if (blob) {
+        selectedZoomBlobUrl.value = URL.createObjectURL(blob);
+    }
 }
 
 function closeZoom() {
-  showZoom.value = false;
-  // Cleanup is handled by watcher or naturally, but let's be explicit
-  if (selectedZoomBlobUrl.value) {
-    URL.revokeObjectURL(selectedZoomBlobUrl.value);
-    selectedZoomBlobUrl.value = null;
-  }
-  selectedZoomItem.value = null;
+    showZoom.value = false;
+    // Cleanup is handled by watcher or naturally, but let's be explicit
+    if (selectedZoomBlobUrl.value) {
+        URL.revokeObjectURL(selectedZoomBlobUrl.value);
+        selectedZoomBlobUrl.value = null;
+    }
+    selectedZoomItem.value = null;
 }
 
 const tabs = [
-  { id: 'generate', icon: Image },
-  { id: 'library', icon: Library },
-  { id: 'settings', icon: Settings },
+    { id: "generate", icon: Image },
+    { id: "library", icon: Library },
+    { id: "settings", icon: Settings },
 ];
 
 function downloadItem(blobUrl: string | null, id?: string) {
-  if (!blobUrl) return;
-  const a = document.createElement('a');
-  a.href = blobUrl;
-  a.download = `pixeo-${id || Date.now()}`;
-  a.click();
+    if (!blobUrl) return;
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = `pixeo-${id || Date.now()}`;
+    a.click();
 }
 
 function toggleTheme() {
-    const themes = ['dark', 'light', 'system'];
+    const themes = ["dark", "light", "system"];
     const currentIndex = themes.indexOf(configStore.theme);
     configStore.theme = themes[(currentIndex + 1) % themes.length];
 }
 
 onMounted(() => {
-  configStore.theme = configStore.theme; // Trigger watcher
-  configStore.locale = configStore.locale; // Sync locale from localStorage
-  historyStore.initDB();
-  configStore.refreshQuota();
+    configStore.theme = configStore.theme; // Trigger watcher
+    configStore.locale = configStore.locale; // Sync locale from localStorage
+    historyStore.initDB();
+    configStore.refreshQuota();
 });
 </script>
 
 <style>
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
-  opacity: 0;
-  transform: translateY(10px);
+    opacity: 0;
+    transform: translateY(10px);
 }
 
 .container {
-  max-width: 1400px;
+    max-width: 1400px;
 }
 </style>

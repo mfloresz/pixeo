@@ -124,14 +124,23 @@
                                         class="text-[10px] uppercase font-bold text-muted-foreground tracking-wider"
                                         >{{ $t(`common.${key}`) || key }}</label
                                     >
-                                    <span class="text-xs font-mono font-bold">{{
-                                        params[key]
-                                    }}</span>
+                                    <input
+                                        v-if="cfg.min !== undefined && cfg.max !== undefined"
+                                        type="number"
+                                        :min="cfg.min"
+                                        :max="cfg.max"
+                                        :step="cfg.step || 1"
+                                        v-model.number="params[key]"
+                                        class="w-28 text-right bg-transparent border rounded px-1.5 py-0.5 text-xs font-mono font-bold outline-none focus:ring-1 focus:ring-primary"
+                                    />
+                                    <span
+                                        v-else
+                                        class="text-xs font-mono font-bold"
+                                        >{{ params[key] }}</span
+                                    >
                                 </div>
                                 <input
-                                    v-if="
-                                        cfg.min !== undefined && cfg.max !== undefined
-                                    "
+                                    v-if="cfg.min !== undefined && cfg.max !== undefined"
                                     type="range"
                                     :min="cfg.min"
                                     :max="cfg.max"

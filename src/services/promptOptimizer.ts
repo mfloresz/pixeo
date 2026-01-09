@@ -1,7 +1,7 @@
 import optimizePrompts from '../config/optimize_prompts.json';
 
 const OPTIMIZE_ENDPOINT = 'https://llm.chutes.ai/v1/chat/completions';
-const OPTIMIZE_MODEL = 'openai/gpt-oss-20b';
+const OPTIMIZE_MODEL = 'openai/gpt-oss-120b-TEE';
 
 export async function optimizePrompt(
     apiKey: string,

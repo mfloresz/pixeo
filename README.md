@@ -21,6 +21,7 @@ A modern web application for generating images, editing images, and creating vid
 - **Multi-language Support**: Available in Spanish and English.
 - **Local Storage**: Uses IndexedDB to save content without needing a server.
 - **Real-time Notifications**: Receive immediate feedback on your generation progress.
+- **Prompt Optimization**: Some models support automatic prompt enhancement for better results.
 
 ## ⚠️ Project Status
 
@@ -88,7 +89,20 @@ bun run dev
 3. Select an available model
 4. Configure resolution and advanced parameters
 5. Write your prompt
-6. Click "Generate"
+6. (Optional) Enable "Optimize Prompt" if available for the selected model
+7. Click "Generate"
+
+### Prompt Optimization
+Some models support automatic prompt optimization through specialized AI experts. When enabled, the original prompt is analyzed and rewritten to enhance visual details, properly handle text content in images, and specify artistic style appropriately.
+
+This feature is available for the following models:
+- **qwen-image** - General image prompt enhancer
+- **qwen-image-2512** - Portrait-focused image prompt enhancer
+- **qwen-image-edit-2509** - Edit prompt enhancer
+- **qwen-image-edit-2511** - Edit prompt enhancer (v2)
+- **z-image-turbo** - Visionary artist prompt enhancer
+
+The optimization configuration is located in `src/config/optimize_prompts.json`.
 
 ### Manage Library
 - The **Library** tab shows all your generated content

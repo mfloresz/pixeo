@@ -37,15 +37,27 @@
         </div>
 
         <!-- Right: Info -->
-        <div class="flex-1 p-6 md:p-8 overflow-y-auto bg-card/50 border-l border-white/5">
+        <div class="flex-1 p-6 md:p-4 overflow-y-auto bg-card/50 border-l border-white/5">
           <div class="space-y-6">
             <div>
               <h3 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{{ $t('common.model') }}</h3>
               <p class="text-lg font-bold">{{ item.model }}</p>
             </div>
-            <div>
-              <h3 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{{ $t('common.prompt') }}</h3>
-              <p class="text-sm leading-relaxed bg-muted/30 p-4 rounded-xl border border-white/5 shadow-inner">{{ item.params.prompt }}</p>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-bold text-muted-foreground uppercase tracking-widest">{{ $t('common.prompt') }}</h3>
+                <button
+                  @click="copyPrompt"
+                  class="p-1.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  :title="$t('actions.copy')"
+                >
+                  <Check v-if="copied" class="w-4 h-4 text-green-500" />
+                  <Copy v-else class="w-4 h-4" />
+                </button>
+              </div>
+              <div class="max-h-40 overflow-y-auto bg-muted/30 p-4 rounded-xl border border-white/5 shadow-inner">
+                <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ item.params.prompt }}</p>
+              </div>
             </div>
             <div v-if="item.params.negative_prompt" class="opacity-60">
               <h3 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{{ $t('common.negativePrompt') }}</h3>
@@ -71,8 +83,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue';
-import { X, Download, Mic } from 'lucide-vue-next';
+import { computed, ref, type PropType } from 'vue';
+import { X, Download, Mic, Copy, Check } from 'lucide-vue-next';
 import type { HistoryItem } from '@/stores/history';
 
 const props = defineProps({
@@ -83,11 +95,22 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'download']);
 
+const copied = ref(false);
+
 function close() {
   emit('close');
 }
 function download() {
   emit('download');
+}
+
+async function copyPrompt() {
+  if (!props.item?.params?.prompt) return;
+  await navigator.clipboard.writeText(props.item.params.prompt);
+  copied.value = true;
+  setTimeout(() => {
+    copied.value = false;
+  }, 2000);
 }
 
 // Filter params similar to App.vue logic
