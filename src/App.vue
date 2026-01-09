@@ -47,40 +47,9 @@
     <main class="container mx-auto px-4 py-8 md:px-8 min-h-[calc(100vh-4rem)]">
       <Transition name="fade" mode="out-in">
         <div v-if="activeTab === 'generate'" key="generate" class="h-full flex flex-col gap-8">
-          <!-- Generation View -->
-          <div class="flex-1 flex flex-col items-center justify-center min-h-[400px] rounded-3xl bg-muted/10 border relative overflow-hidden group">
-            <div v-if="latestBlobUrl" class="w-full h-full flex flex-col items-center justify-center p-4">
-               <div class="relative max-w-4xl w-full h-full flex items-center justify-center bg-black/5 rounded-2xl overflow-hidden shadow-2xl">
-                 <img v-if="latestItem?.type === 'image'" :src="latestBlobUrl" class="max-w-full max-h-full object-contain cursor-zoom-in" @click="openZoom(latestItem)" />
-                 <video v-else-if="latestItem?.type === 'video'" :src="latestBlobUrl" class="max-w-full max-h-full object-contain" controls autoplay loop />
-                 <div v-else-if="latestItem?.type === 'audio'" class="flex flex-col items-center gap-4">
-                    <Mic class="w-20 h-20 text-primary animate-pulse" />
-                    <audio :src="latestBlobUrl" controls />
-                 </div>
-                 
-                 <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center bg-black/50 backdrop-blur-md p-3 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div class="text-xs text-white truncate max-w-[60%]">
-                      <span class="font-bold mr-2 uppercase tracking-tighter">{{ latestItem?.model }}</span>
-                      <span class="opacity-70">{{ latestItem?.params.prompt }}</span>
-                    </div>
-                    <div class="flex gap-2">
-                      <button @click="openZoom(latestItem!)" class="bg-white/20 text-white p-2 rounded-lg hover:bg-white/30 transition-colors">
-                        <Maximize2 class="w-4 h-4" />
-                      </button>
-                      <button @click="downloadItem(latestBlobUrl, latestItem?.id)" class="bg-white text-black p-2 rounded-lg hover:bg-white/90 transition-colors">
-                        <Download class="w-4 h-4" />
-                      </button>
-                    </div>
-                 </div>
-               </div>
-            </div>
-            <div v-else class="text-center text-muted-foreground p-12">
-               <div class="w-20 h-20 bg-muted/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                 <Sparkles class="w-10 h-10 opacity-20" />
-               </div>
-               <h2 class="text-2xl font-bold text-foreground mb-2">Pixeo Creative Studio</h2>
-               <p class="text-sm max-w-xs mx-auto opacity-60">Tu estudio creativo potenciado por IA. Elige un modelo, escribe tu idea y deja que la magia ocurra.</p>
-            </div>
+          <!-- Generation History -->
+          <div class="flex-1 flex flex-col rounded-3xl bg-muted/10 border relative overflow-hidden">
+            <GenerationHistory :session-items="sessionItems" @zoom="openZoom" @download="downloadItem" />
           </div>
 
           <!-- Floating Input Area -->
@@ -121,7 +90,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { Image, Settings, Library, Sun, Moon, Sparkles, Download, Mic, Maximize2 } from 'lucide-vue-next';
+import { Image, Settings, Library, Sun, Moon, Download } from 'lucide-vue-next';
 import Toaster from './components/ui/Toaster.vue';
 import { useConfigStore } from './stores/config';
 import { useHistoryStore } from './stores/history';
@@ -130,6 +99,7 @@ import PromptInput from './components/generate/PromptInput.vue';
 import SettingsView from './components/settings/SettingsView.vue';
 import LibraryItem from './components/library/LibraryItem.vue';
 import ZoomModal from './components/zoom/ZoomModal.vue';
+import GenerationHistory from './components/generate/GenerationHistory.vue';
 
 const configStore = useConfigStore();
 const historyStore = useHistoryStore();
@@ -140,10 +110,6 @@ const activeTab = ref('generate');
 const showZoom = ref(false);
 const selectedZoomItem = ref<HistoryItem | null>(null);
 const selectedZoomBlobUrl = ref<string | null>(null);
-const latestBlobUrl = ref<string | null>(null);
-const latestItem = computed(() => sessionItems.value[0]);
-
-
 
 async function openZoom(item: HistoryItem) {
   selectedZoomItem.value = item;
@@ -166,14 +132,6 @@ function closeZoom() {
   }
   selectedZoomItem.value = null;
 }
-
-watch(latestItem, async (newItem) => {
-  if (newItem) {
-    if (latestBlobUrl.value) URL.revokeObjectURL(latestBlobUrl.value);
-    const blob = await historyStore.getBlob(newItem.id);
-    if (blob) latestBlobUrl.value = URL.createObjectURL(blob);
-  }
-}, { immediate: true });
 
 const tabs = [
   { id: 'generate', icon: Image },
