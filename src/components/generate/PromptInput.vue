@@ -321,15 +321,15 @@ async function generate() {
                 );
                 configStore.addLog({
                     type: mode.value,
-                    message: i18n.t('logs.promptOptimized', { model: model.name }),
+                    message: i18n.global.t('logs.promptOptimized', { model: model.name }),
                 });
             } catch (err: any) {
                 toast.warning(
-                    i18n.t('logs.optimizationFailed', { error: err.message }),
+                    i18n.global.t('logs.optimizationFailed', { error: err.message }),
                 );
                 configStore.addLog({
                     type: mode.value,
-                    message: i18n.t('logs.optimizationFailed', { error: err.message }),
+                    message: i18n.global.t('logs.optimizationFailed', { error: err.message }),
                     warning: true,
                 });
             }
@@ -380,7 +380,7 @@ async function generate() {
 
         configStore.addLog({
             type: mode.value,
-            message: i18n.t('logs.sendingRequest', { model: model.name, endpoint }),
+            message: i18n.global.t('logs.sendingRequest', { model: model.name, endpoint }),
             details: JSON.parse(JSON.stringify(payload, redactor)),
         });
 
@@ -407,7 +407,7 @@ async function generate() {
         toast.success($t('generate.success'));
         configStore.addLog({
             type: mode.value,
-            message: i18n.t('logs.generationSuccess', { model: model.name }),
+            message: i18n.global.t('logs.generationSuccess', { model: model.name }),
         });
         configStore.refreshQuota();
     } catch (err: any) {
