@@ -167,24 +167,8 @@ Models are configured in `src/config/models_data.ts`. Each model includes:
 ### Resolution Customization
 See `src/config/custom_resolutions.md` to learn how to define custom resolutions.
 
-## 📄 License
-
-This project is private and intended for internal use.
-
-## 📞 Support
-
-For technical support or questions, contact the development team.
-
 ---
 
 ## 💡 Technical Note
 
 This application is **vibe coded**, which means it was built quickly and practically to fulfill its purpose. As such, it may not be properly optimized and could contain code that doesn't follow development best practices. Any improvement or optimization is welcome.
-
-## 🤝 Contributing
-
-1. Fork the project
-2. Create a branch for your feature (`git checkout -b feature/new-feature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/new-feature`)
-5. Open a Pull Request
