@@ -6,9 +6,9 @@ A modern web application for generating images, editing images, and creating vid
 
 ## 📸 Screenshots
 
-| Image Generation | Settings |
-|------------------------|---------------|
-| ![Generate](./docs/images/generate.jpeg) | ![Settings](./docs/images/settings.jpeg) |
+| Image Generation | Library | Settings |
+|------------------------|---------------|---------------|
+| ![Generate](./docs/images/generate.jpeg) | ![Library](./docs/images/library.jpeg) | ![Settings](./docs/images/settings.jpeg) |
 
 ## ✨ Features
 

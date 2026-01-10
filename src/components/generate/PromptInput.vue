@@ -294,6 +294,16 @@ async function handleFileUpload(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
+    // Obtener dimensiones de la imagen
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    await new Promise<void>((resolve) => {
+        img.onload = () => resolve();
+    });
+    const width = img.width;
+    const height = img.height;
+    URL.revokeObjectURL(img.src);
+
     const reader = new FileReader();
     reader.onload = (ev) => {
         const b64 = ev.target?.result as string;
@@ -301,6 +311,11 @@ async function handleFileUpload(e: Event) {
             url: URL.createObjectURL(file),
             b64: b64.split(",")[1],
         });
+
+        // Actualizar width/height con las dimensiones de la imagen
+        if (params.value.width !== undefined) params.value.width = width;
+        if (params.value.height !== undefined) params.value.height = height;
+        selectedResolution.value = 'custom';
     };
     reader.readAsDataURL(file);
 }
