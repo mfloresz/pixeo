@@ -4,6 +4,7 @@
     class="toaster group"
     :icons="icons"
     :style="toastStyles"
+    position="top-right"
     v-bind="$attrs"
   />
 </template>

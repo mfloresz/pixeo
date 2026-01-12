@@ -160,10 +160,10 @@
                 @edit="handleEdit"
             />
         </main>
-
-        <!-- Sonner Toaster -->
-        <Toaster />
     </div>
+
+    <!-- Sonner Toaster -->
+    <Toaster class="z-[9999]" />
 </template>
 
 <script setup lang="ts">

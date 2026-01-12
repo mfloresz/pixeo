@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "vue-sonner/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -151,4 +152,13 @@
   body {
     @apply font-sans bg-background text-foreground;
   }
+}
+
+[data-sonner-toast] {
+  z-index: 9999 !important;
+}
+
+[data-sonner-toaster] {
+  position: fixed !important;
+  z-index: 9999 !important;
 }
