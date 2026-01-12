@@ -60,7 +60,10 @@ const messages = {
       apiKeyPlaceholder: "Enter your Chutes API Key",
       logs: "Activity Logs",
       theme: "Theme",
+      storage: "Storage",
       clearLogs: "Clear logs",
+      regenerateThumbnails: "Regenerate Thumbnails",
+      clearThumbnails: "Clear Thumbnail Cache",
       waitingActivity: "Waiting for activity...",
     },
     actions: {
@@ -143,7 +146,10 @@ const messages = {
       apiKeyPlaceholder: "Ingresa tu Clave API de Chutes",
       logs: "Log de Actividad",
       theme: "Tema",
+      storage: "Almacenamiento",
       clearLogs: "Limpiar logs",
+      regenerateThumbnails: "Regenerar Miniaturas",
+      clearThumbnails: "Limpiar Cache de Miniaturas",
       waitingActivity: "Esperando actividad...",
     },
     actions: {

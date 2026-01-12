@@ -50,6 +50,18 @@
         </div>
       </div>
 
+      <div class="space-y-2">
+        <label class="text-sm font-semibold ml-1">{{ $t('settings.storage') }}</label>
+        <div class="flex gap-2">
+          <button @click="regenerateThumbnails" class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm font-bold transition-all">
+            {{ $t('settings.regenerateThumbnails') }}
+          </button>
+          <button @click="clearOrphanedThumbnails" class="px-4 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-xl text-sm font-bold transition-all">
+            {{ $t('settings.clearThumbnails') }}
+          </button>
+        </div>
+      </div>
+
       <div class="space-y-4 pt-4 border-t">
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-bold">{{ $t('settings.logs') }}</h2>
@@ -75,11 +87,27 @@
 import { storeToRefs } from 'pinia';
 import { Sun, Moon, Monitor } from 'lucide-vue-next';
 import { useConfigStore } from '../../stores/config';
+import { useHistoryStore } from '../../stores/history';
 
 const configStore = useConfigStore();
+const historyStore = useHistoryStore();
 const { apiKey, locale, theme, logs } = storeToRefs(configStore);
 
 function formatDate(date: Date) {
   return new Date(date).toLocaleTimeString();
+}
+
+async function regenerateThumbnails() {
+  if (confirm('¿Quieres regenerar miniaturas para todos los elementos existentes? Esto puede tomar tiempo.')) {
+    await historyStore.regenerateThumbnails();
+    alert('Miniaturas regeneradas.');
+  }
+}
+
+async function clearOrphanedThumbnails() {
+  if (confirm('¿Estás seguro de que quieres limpiar la cache de miniaturas huérfanas? Esta acción no se puede deshacer.')) {
+    await historyStore.clearOrphanedThumbnails();
+    alert('Cache de miniaturas limpiada.');
+  }
 }
 </script>
