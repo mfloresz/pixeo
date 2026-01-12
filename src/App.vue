@@ -32,30 +32,45 @@
 
                 <div class="flex items-center gap-4">
                     <!-- Quota Display -->
-                    <div
-                        v-if="apiKey && quota > 0"
-                        class="hidden md:flex flex-col items-end text-[10px] text-muted-foreground mr-2"
-                    >
-                        <span class="font-mono">{{
-                            $t("common.usageQuota", { used, quota })
-                        }}</span>
-                        <div
-                            class="w-24 h-1 bg-muted rounded-full overflow-hidden mt-1"
-                        >
-                            <div
-                                class="bg-primary h-full transition-all duration-500"
-                                :style="{
-                                    width: `${Math.min((used / quota) * 100, 100)}%`,
-                                }"
-                            />
-                        </div>
-                    </div>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <div
+                                    v-if="apiKey && quota > 0"
+                                    class="hidden md:flex flex-col items-end text-[10px] text-muted-foreground mr-2 cursor-help"
+                                >
+                                    <span class="font-mono">{{
+                                        $t("common.usageQuota", { used, quota })
+                                    }}</span>
+                                    <div
+                                        class="w-24 h-1 bg-muted rounded-full overflow-hidden mt-1"
+                                    >
+                                        <div
+                                            class="bg-primary h-full transition-all duration-500"
+                                            :style="{
+                                                width: `${Math.min((used / quota) * 100, 100)}%`,
+                                            }"
+                                        />
+                                    </div>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p class="text-sm">
+                                    {{
+                                        $t("common.quotaResetsIn", {
+                                            time: timeUntilReset,
+                                        })
+                                    }}
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </div>
         </header>
 
         <main
-            class="container mx-auto px-4 py-8 md:px-8 min-h-[calc(100vh-4rem)] pb-32"
+            class="container mx-auto px-4 py-8 md:px-8 min-h-[calc(100vh-m)] pb-32"
         >
             <Transition name="fade" mode="out-in">
                 <div
@@ -78,7 +93,7 @@
                     <div
                         class="max-w-3xl mx-auto w-full fixed bottom-0 left-0 right-0 px-4 md:px-8 pb-4 transition-all duration-500 ease-in-out z-40"
                     >
-                        <PromptInput />
+                        <PromptInput ref="promptInputRef" />
                     </div>
                 </div>
 
@@ -142,6 +157,7 @@
                 @download="
                     downloadItem(selectedZoomBlobUrl, selectedZoomItem?.id)
                 "
+                @edit="handleEdit"
             />
         </main>
 
@@ -151,11 +167,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { toast } from "vue-sonner";
 import { i18n } from "./i18n";
 const { t } = i18n.global;
 import { storeToRefs } from "pinia";
+import { nextTick } from "vue";
 import {
     Image,
     Settings,
@@ -169,17 +186,57 @@ import {
 import Toaster from "./components/ui/Toaster.vue";
 import { useConfigStore } from "./stores/config";
 import { useHistoryStore } from "./stores/history";
-import type { HistoryItem } from "./stores/history";
+import { useModelsStore } from "./stores/models";
+import type { HistoryItem } from "./types";
 import PromptInput from "./components/generate/PromptInput.vue";
 import SettingsView from "./components/settings/SettingsView.vue";
 import LibraryItem from "./components/library/LibraryItem.vue";
 import ZoomModal from "./components/zoom/ZoomModal.vue";
 import GenerationHistory from "./components/generate/GenerationHistory.vue";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "./components/ui/tooltip";
 
 const configStore = useConfigStore();
 const historyStore = useHistoryStore();
+const modelsStore = useModelsStore();
 const { apiKey, theme, quota, used } = storeToRefs(configStore);
 const { items, sessionItems } = storeToRefs(historyStore);
+
+function getTimeUntilReset(): string {
+    const now = new Date();
+    const utcNow = new Date(now.toISOString());
+    const tomorrowUTC = new Date(utcNow);
+    tomorrowUTC.setUTCHours(0, 0, 0, 0);
+    tomorrowUTC.setUTCDate(tomorrowUTC.getUTCDate() + 1);
+    const diffMs = tomorrowUTC.getTime() - utcNow.getTime();
+    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    return `${diffHrs}h ${diffMins}m`;
+}
+
+const timeUntilReset = ref(getTimeUntilReset());
+
+let timeUpdateInterval: number;
+
+onMounted(() => {
+    configStore.theme = configStore.theme;
+    configStore.locale = configStore.locale;
+    historyStore.initDB();
+    configStore.refreshQuota();
+    timeUpdateInterval = setInterval(() => {
+        timeUntilReset.value = getTimeUntilReset();
+    }, 60000);
+});
+
+onUnmounted(() => {
+    if (timeUpdateInterval) {
+        clearInterval(timeUpdateInterval);
+    }
+});
 
 async function clearLibrary() {
     if (items.value.length === 0) return;
@@ -193,6 +250,7 @@ const activeTab = ref("generate");
 const showZoom = ref(false);
 const selectedZoomItem = ref<HistoryItem | null>(null);
 const selectedZoomBlobUrl = ref<string | null>(null);
+const promptInputRef = ref<InstanceType<typeof PromptInput> | null>(null);
 
 async function openZoom(item: HistoryItem) {
     selectedZoomItem.value = item;
@@ -237,12 +295,40 @@ function toggleTheme() {
     configStore.theme = themes[(currentIndex + 1) % themes.length];
 }
 
-onMounted(() => {
-    configStore.theme = configStore.theme; // Trigger watcher
-    configStore.locale = configStore.locale; // Sync locale from localStorage
-    historyStore.initDB();
-    configStore.refreshQuota();
-});
+async function handleEdit(item: HistoryItem, blobUrl: string | null) {
+    // Set mode to image‑edit and select the correct model
+    modelsStore.mode = "image-edit";
+    await nextTick();
+    modelsStore.selectedModelId = "qwen-image-edit-2511";
+    // We don't need to await nextTick here again for the store update strictly, but good for safety
+    
+    // Get the image blob
+    let blob: Blob | null = null;
+    if (blobUrl) {
+        try {
+            const response = await fetch(blobUrl);
+            blob = await response.blob();
+        } catch (e) {
+            console.error("Failed to fetch blobUrl", e);
+        }
+    }
+
+    if (!blob) {
+        blob = await historyStore.getBlob(item.id);
+    }
+
+    // Set pending edit in store
+    modelsStore.pendingEditItem = item;
+    modelsStore.pendingEditBlob = blob;
+    
+    // Switch to generate tab if not already there
+    if (activeTab.value !== "generate") {
+        activeTab.value = "generate";
+    }
+
+    // Finally close the zoom modal (revokes temporary blob URL)
+    closeZoom();
+}
 </script>
 
 <style>

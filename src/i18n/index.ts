@@ -23,8 +23,14 @@ const messages = {
       success: "Success",
       error: "Error",
       model: "Model",
-      usageQuota: "{used} / {quota} usage",
+      usageQuota: "Used: {used} / {quota}",
+      quotaResetsIn: "Resets in {time}",
       itemCount: "{count} items",
+      width: "Width",
+      height: "Height",
+      guidance_scale: "Guidance Scale",
+      true_cfg_scale: "True CFG Scale",
+      num_inference_steps: "Inference Steps",
     },
     generate: {
       placeholder: "Describe what you want to create...",
@@ -32,10 +38,18 @@ const messages = {
       advanced: "Advanced",
       optimize: "Optimize",
       clearGenerations: "Clear Generations",
+      clearPrompt: "Clear Prompt",
+      translatePrompt: "Translate to English",
       success: "Generation completed!",
       heroTitle: "Pixeo Creative Studio",
       heroSubtitle:
         "Your AI-powered creative studio. Choose a model, write your idea, and let the magic happen.",
+      tooltips: {
+        advancedSettings: "Advanced settings",
+        optimize: "Optimize prompt",
+        clearGenerations: "Clear all generations",
+        generate: "Generate",
+      },
     },
     library: {
       empty: "No items found in your library.",
@@ -53,6 +67,7 @@ const messages = {
       zoom: "Zoom",
       download: "Download",
       delete: "Delete",
+      copy: "Copy",
       downloadContent: "Download Content",
       deleteAll: "Delete All",
       deleteAllConfirm:
@@ -63,6 +78,7 @@ const messages = {
       optimizationFailed: "Optimization failed, using original prompt: {error}",
       sendingRequest: "[{model}] Sending request to: {endpoint}",
       generationSuccess: "Generation successful: {model}",
+      translationSuccess: "Prompt translated successfully",
     },
     errors: {
       quotaFetchFailed: "Failed to fetch quota",
@@ -90,8 +106,14 @@ const messages = {
       success: "Éxito",
       error: "Error",
       model: "Modelo",
-      usageQuota: "{used} / {quota} uso",
+      usageQuota: "Usado: {used} / {quota}",
+      quotaResetsIn: "Se reinicia en {time}",
       itemCount: "{count} elementos",
+      width: "Ancho",
+      height: "Alto",
+      guidance_scale: "Escala de Guía",
+      true_cfg_scale: "Escala CFG Verdadera",
+      num_inference_steps: "Pasos de Inferencia",
     },
     generate: {
       placeholder: "Describe lo que quieres crear...",
@@ -99,10 +121,18 @@ const messages = {
       advanced: "Avanzado",
       optimize: "Optimizar",
       clearGenerations: "Limpiar Generaciones",
+      clearPrompt: "Limpiar Prompt",
+      translatePrompt: "Traducir a inglés",
       success: "¡Generación completada!",
       heroTitle: "Pixeo Creative Studio",
       heroSubtitle:
         "Tu estudio creativo potenciado por IA. Elige un modelo, escribe tu idea y deja que la magia ocurra.",
+      tooltips: {
+        advancedSettings: "Configuración avanzada",
+        optimize: "Optimizar prompt",
+        clearGenerations: "Limpiar todas las generaciones",
+        generate: "Generar",
+      },
     },
     library: {
       empty: "No se encontraron elementos en tu biblioteca.",
@@ -120,6 +150,7 @@ const messages = {
       zoom: "Zoom",
       download: "Descargar",
       delete: "Eliminar",
+      copy: "Copiar",
       downloadContent: "Descargar Contenido",
       deleteAll: "Eliminar Todo",
       deleteAllConfirm:
@@ -131,6 +162,7 @@ const messages = {
         "Optimización fallida, usando prompt original: {error}",
       sendingRequest: "[{model}] Enviando petición a: {endpoint}",
       generationSuccess: "Generación exitosa: {model}",
+      translationSuccess: "Prompt traducido exitosamente",
     },
     errors: {
       quotaFetchFailed: "Error al obtener cuota",

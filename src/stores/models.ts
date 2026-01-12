@@ -19,6 +19,10 @@ export const useModelsStore = defineStore('models', () => {
     const params = ref<Record<string, any>>({});
     const selectedResolution = ref('1024x1024');
 
+    // Pending edit state
+    const pendingEditItem = ref<any>(null);
+    const pendingEditBlob = ref<Blob | string | null>(null);
+
     const availableModels = computed(() => {
         switch (mode.value) {
             case 'text2image': return IMG_MODELS;
@@ -118,5 +122,15 @@ export const useModelsStore = defineStore('models', () => {
         }
     });
 
-    return { mode, selectedModelId, selectedModel, availableModels, availableResolutions, params, selectedResolution };
+    return {
+        mode,
+        selectedModelId,
+        selectedModel,
+        availableModels,
+        availableResolutions,
+        params,
+        selectedResolution,
+        pendingEditItem,
+        pendingEditBlob
+    };
 });

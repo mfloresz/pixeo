@@ -2,16 +2,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { openDB, type IDBPDatabase } from "idb";
-
-export interface HistoryItem {
-  id: string;
-  type: "image" | "video" | "audio";
-  mode: string;
-  model: string;
-  params: any;
-  timestamp: Date;
-  blobKey: string;
-}
+import type { HistoryItem } from "../types";
 
 const DB_NAME = "pixeo_db";
 const STORE_NAME = "history";
@@ -21,6 +12,8 @@ export const useHistoryStore = defineStore("history", () => {
   const items = ref<HistoryItem[]>([]);
   const sessionItems = ref<HistoryItem[]>([]);
   let db: IDBPDatabase | null = null;
+  const blobCache = new Map<string, Blob>();
+  const CACHE_MAX_SIZE = 50;
 
   async function initDB() {
     if (db) return;
@@ -58,13 +51,29 @@ export const useHistoryStore = defineStore("history", () => {
 
   async function getBlob(id: string): Promise<Blob | null> {
     if (!db) await initDB();
-    return db!.get(BLOB_STORE, id);
+    
+    if (blobCache.has(id)) {
+      return blobCache.get(id)!;
+    }
+    
+    const blob = await db!.get(BLOB_STORE, id);
+    if (blob) {
+      if (blobCache.size >= CACHE_MAX_SIZE) {
+        const firstKey = blobCache.keys().next().value;
+        if (firstKey) {
+          blobCache.delete(firstKey);
+        }
+      }
+      blobCache.set(id, blob);
+    }
+    return blob;
   }
 
   async function removeItem(id: string) {
     if (!db) await initDB();
     await db!.delete(STORE_NAME, id);
     await db!.delete(BLOB_STORE, id);
+    blobCache.delete(id);
     items.value = items.value.filter((i) => i.id !== id);
   }
 
@@ -73,6 +82,7 @@ export const useHistoryStore = defineStore("history", () => {
     await db!.clear(STORE_NAME);
     await db!.clear(BLOB_STORE);
     items.value = [];
+    blobCache.clear();
   }
 
   return {
