@@ -19,7 +19,7 @@ const messages = {
       seed: "Seed",
       apiKey: "API Key",
       save: "Save",
-      loading: "Loading...",
+      loading: "Generating",
       success: "Success",
       error: "Error",
       model: "Model",
@@ -41,9 +41,7 @@ const messages = {
       clearPrompt: "Clear Prompt",
       translatePrompt: "Translate to English",
       success: "Generation completed!",
-      heroTitle: "Pixeo Creative Studio",
-      heroSubtitle:
-        "Your AI-powered creative studio. Choose a model, write your idea, and let the magic happen.",
+      heroTitle: "Pixeo Studio",
       tooltips: {
         advancedSettings: "Advanced settings",
         optimize: "Optimize prompt",
@@ -108,7 +106,7 @@ const messages = {
       seed: "Semilla",
       apiKey: "Clave API",
       save: "Guardar",
-      loading: "Cargando...",
+      loading: "Generando",
       success: "Éxito",
       error: "Error",
       model: "Modelo",
@@ -130,9 +128,7 @@ const messages = {
       clearPrompt: "Limpiar Prompt",
       translatePrompt: "Traducir a inglés",
       success: "¡Generación completada!",
-      heroTitle: "Pixeo Creative Studio",
-      heroSubtitle:
-        "Tu estudio creativo potenciado por IA. Elige un modelo, escribe tu idea y deja que la magia ocurra.",
+      heroTitle: "Pixeo Studio",
       tooltips: {
         advancedSettings: "Configuración avanzada",
         optimize: "Optimizar prompt",

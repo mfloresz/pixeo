@@ -80,7 +80,7 @@
                 >
                     <!-- Generation History -->
                     <div
-                        class="flex-1 flex flex-col rounded-3xl bg-muted/10 border relative overflow-hidden"
+                        class="flex-1 flex flex-col rounded-3xl relative overflow-hidden"
                     >
                         <GenerationHistory
                             :session-items="sessionItems"
@@ -163,7 +163,7 @@
     </div>
 
     <!-- Sonner Toaster -->
-    <Toaster class="z-[9999]" />
+    <Toaster class="z-9999" />
 </template>
 
 <script setup lang="ts">
@@ -173,16 +173,7 @@ import { i18n } from "./i18n";
 const { t } = i18n.global;
 import { storeToRefs } from "pinia";
 import { nextTick } from "vue";
-import {
-    Image,
-    Settings,
-    Library,
-    Sun,
-    Moon,
-    Monitor,
-    Download,
-    Trash2,
-} from "lucide-vue-next";
+import { Image, Settings, Library, Trash2 } from "lucide-vue-next";
 import Toaster from "./components/ui/Toaster.vue";
 import { useConfigStore } from "./stores/config";
 import { useHistoryStore } from "./stores/history";
@@ -203,7 +194,7 @@ import {
 const configStore = useConfigStore();
 const historyStore = useHistoryStore();
 const modelsStore = useModelsStore();
-const { apiKey, theme, quota, used } = storeToRefs(configStore);
+const { apiKey, quota, used } = storeToRefs(configStore);
 const { items, sessionItems } = storeToRefs(historyStore);
 
 function getTimeUntilReset(): string {
@@ -301,7 +292,7 @@ async function handleEdit(item: HistoryItem, blobUrl: string | null) {
     await nextTick();
     modelsStore.selectedModelId = "qwen-image-edit-2511";
     // We don't need to await nextTick here again for the store update strictly, but good for safety
-    
+
     // Get the image blob
     let blob: Blob | null = null;
     if (blobUrl) {
@@ -320,7 +311,7 @@ async function handleEdit(item: HistoryItem, blobUrl: string | null) {
     // Set pending edit in store
     modelsStore.pendingEditItem = item;
     modelsStore.pendingEditBlob = blob;
-    
+
     // Switch to generate tab if not already there
     if (activeTab.value !== "generate") {
         activeTab.value = "generate";

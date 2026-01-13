@@ -1,7 +1,7 @@
 <template>
     <div class="flex justify-center">
         <div
-            class="p-1 rounded-3xl bg-card border shadow-2xl backdrop-blur-xl bg-card/80 min-w-225"
+            class="p-1 rounded-3xl border shadow-2xl backdrop-blur-xl bg-card/80 min-w-275"
         >
             <TooltipProvider>
                 <div class="p-4 pt-4 pb-4 space-y-4">
@@ -45,12 +45,19 @@
 
                     <!-- Prompt Textarea -->
                     <div class="relative group">
-                        <div v-if="promptLimit !== Infinity" class="flex justify-between items-center mb-2">
+                        <div
+                            v-if="promptLimit !== Infinity"
+                            class="flex justify-between items-center mb-2"
+                        >
                             <span class="text-xs text-muted-foreground">
-                                {{ $t('generate.promptLimit') }}: {{ characterCount }} / {{ promptLimit }}
+                                {{ $t("generate.promptLimit") }}:
+                                {{ characterCount }} / {{ promptLimit }}
                             </span>
-                            <span v-if="characterCount > promptLimit" class="text-xs text-destructive font-medium">
-                                {{ $t('generate.promptExceeded') }}
+                            <span
+                                v-if="characterCount > promptLimit"
+                                class="text-xs text-destructive font-medium"
+                            >
+                                {{ $t("generate.promptExceeded") }}
                             </span>
                         </div>
                         <textarea
@@ -66,7 +73,7 @@
                                         :disabled="!prompt"
                                         class="p-1.5 rounded-lg bg-background/80 hover:bg-background transition-colors disabled:opacity-50"
                                     >
-                                        <Eraser class="w-3.5 h-3.5" />
+                                        <Eraser class="w-5 h-5" />
                                     </button>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -83,7 +90,7 @@
                                     >
                                         <Loader2
                                             v-if="isTranslating"
-                                            class="w-3.5 h-3.5 animate-spin"
+                                            class="w-5 h-5 animate-spin"
                                         />
                                         <Languages v-else class="w-3.5 h-3.5" />
                                     </button>
@@ -162,7 +169,7 @@
                                         </button>
                                     </PopoverTrigger>
                                     <PopoverContent
-                                        class="w-96 max-h-[500px] overflow-y-auto"
+                                        class="w-96 max-h-125 overflow-y-auto"
                                     >
                                         <div class="grid grid-cols-1 gap-4">
                                             <div
@@ -423,23 +430,33 @@ const isValid = computed(() => {
 });
 
 // Watch for pending edits from other components (like ZoomModal)
-watch(pendingEditItem, async (newItem: any) => {
-    if (newItem) {
-        await setForEdit(newItem, pendingEditBlob.value);
-        // Clear pending state
-        modelsStore.pendingEditItem = null;
-        modelsStore.pendingEditBlob = null;
-    }
-}, { immediate: true });
+watch(
+    pendingEditItem,
+    async (newItem: any) => {
+        if (newItem) {
+            await setForEdit(newItem, pendingEditBlob.value);
+            // Clear pending state
+            modelsStore.pendingEditItem = null;
+            modelsStore.pendingEditBlob = null;
+        }
+    },
+    { immediate: true },
+);
 
 // Watch for prompt length and truncate if it exceeds the limit
-watch([prompt, promptLimit], ([newPrompt, newLimit]) => {
-    if (newLimit === Infinity) return; // No limit, skip
-    if (newPrompt.length > newLimit) {
-        prompt.value = newPrompt.substring(0, newLimit);
-        toast.warning(i18n.global.t("generate.promptTruncated", { limit: newLimit }));
-    }
-}, { immediate: true });
+watch(
+    [prompt, promptLimit],
+    ([newPrompt, newLimit]) => {
+        if (newLimit === Infinity) return; // No limit, skip
+        if (newPrompt.length > newLimit) {
+            prompt.value = newPrompt.substring(0, newLimit);
+            toast.warning(
+                i18n.global.t("generate.promptTruncated", { limit: newLimit }),
+            );
+        }
+    },
+    { immediate: true },
+);
 
 const filteredParams = computed(() => {
     if (!selectedModel.value?.params) return {};
@@ -688,33 +705,50 @@ async function setForEdit(item: any, blobOrB64: Blob | string | null = null) {
         if (blobOrB64 instanceof Blob) {
             const reader = new FileReader();
             const b64Promise = new Promise<string>((resolve) => {
-                reader.onload = () => resolve((reader.result as string).split(",")[1]);
+                reader.onload = () =>
+                    resolve((reader.result as string).split(",")[1]);
             });
             reader.readAsDataURL(blobOrB64);
             const b64 = await b64Promise;
 
-            sourceImages.value = [{
-                url: URL.createObjectURL(blobOrB64),
-                b64: b64
-            }];
+            sourceImages.value = [
+                {
+                    url: URL.createObjectURL(blobOrB64),
+                    b64: b64,
+                },
+            ];
         } else {
             // It's a base64 string
-            const b64 = blobOrB64.includes(",") ? blobOrB64.split(",")[1] : blobOrB64;
-            const blob = new Blob([Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))]);
-            sourceImages.value = [{
-                url: URL.createObjectURL(blob),
-                b64: b64
-            }];
+            const b64 = blobOrB64.includes(",")
+                ? blobOrB64.split(",")[1]
+                : blobOrB64;
+            const blob = new Blob([
+                Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)),
+            ]);
+            sourceImages.value = [
+                {
+                    url: URL.createObjectURL(blob),
+                    b64: b64,
+                },
+            ];
         }
     } else if (item.params.image_b64s) {
         sourceImages.value = item.params.image_b64s.map((b64: string) => ({
-            url: URL.createObjectURL(new Blob([Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))])),
+            url: URL.createObjectURL(
+                new Blob([Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))]),
+            ),
             b64,
         }));
     } else if (item.params.image) {
         sourceImages.value = [
             {
-                url: URL.createObjectURL(new Blob([Uint8Array.from(atob(item.params.image), (c) => c.charCodeAt(0))])),
+                url: URL.createObjectURL(
+                    new Blob([
+                        Uint8Array.from(atob(item.params.image), (c) =>
+                            c.charCodeAt(0),
+                        ),
+                    ]),
+                ),
                 b64: item.params.image,
             },
         ];
@@ -725,22 +759,29 @@ async function setForEdit(item: any, blobOrB64: Blob | string | null = null) {
     if (item.params) {
         // Copy seed if it exists on both sides
         if (item.params.seed !== undefined && params.value.seed !== undefined) {
-             params.value.seed = item.params.seed;
+            params.value.seed = item.params.seed;
         }
 
         // Copy dimensions
-        if (params.value.width !== undefined && item.params.width) params.value.width = item.params.width;
-        if (params.value.height !== undefined && item.params.height) params.value.height = item.params.height;
+        if (params.value.width !== undefined && item.params.width)
+            params.value.width = item.params.width;
+        if (params.value.height !== undefined && item.params.height)
+            params.value.height = item.params.height;
     }
 
     // 4. GET dimensions from image if not set in params
-    if (sourceImages.value[0] && (params.value.width === undefined || params.value.height === undefined)) {
+    if (
+        sourceImages.value[0] &&
+        (params.value.width === undefined || params.value.height === undefined)
+    ) {
         const img = new Image();
         img.src = sourceImages.value[0].url;
         await new Promise<void>((resolve) => {
             img.onload = () => {
-                if (params.value.width !== undefined && !params.value.width) params.value.width = img.width;
-                if (params.value.height !== undefined && !params.value.height) params.value.height = img.height;
+                if (params.value.width !== undefined && !params.value.width)
+                    params.value.width = img.width;
+                if (params.value.height !== undefined && !params.value.height)
+                    params.value.height = img.height;
                 resolve();
             };
         });

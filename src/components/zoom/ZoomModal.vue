@@ -111,19 +111,19 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="pt-6 border-t border-white/5 space-y-2">
+                        <div class="pt-4 border-t border-white/5 space-y-2">
                             <button
                                 @click="edit"
                                 class="w-full flex items-center justify-center gap-2 bg-secondary text-secondary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
                             >
-                                <Edit3 class="w-5 h-5" />
+                                <Edit3 class="w-4 h-4" />
                                 {{ editLabel }}
                             </button>
                             <button
                                 @click="download"
                                 class="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20"
                             >
-                                <Download class="w-5 h-5" />
+                                <Download class="w-4 h-4" />
                                 {{ downloadLabel }}
                             </button>
                         </div>
