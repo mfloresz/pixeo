@@ -45,6 +45,14 @@
 
                     <!-- Prompt Textarea -->
                     <div class="relative group">
+                        <div v-if="promptLimit !== Infinity" class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-muted-foreground">
+                                {{ $t('generate.promptLimit') }}: {{ characterCount }} / {{ promptLimit }}
+                            </span>
+                            <span v-if="characterCount > promptLimit" class="text-xs text-destructive font-medium">
+                                {{ $t('generate.promptExceeded') }}
+                            </span>
+                        </div>
                         <textarea
                             v-model="prompt"
                             :placeholder="$t('generate.placeholder')"
@@ -399,6 +407,21 @@ const isGenerating = ref(false);
 const isTranslating = ref(false);
 const sourceImages = ref<{ url: string; b64: string }[]>([]);
 
+const promptLimit = computed(() => {
+    return selectedModel.value?.promptLimit || Infinity;
+});
+
+const characterCount = computed(() => {
+    return prompt.value.length;
+});
+
+const isValid = computed(() => {
+    if (mode.value === "text2speech") return prompt.value.length > 0;
+    if (mode.value === "image-edit")
+        return prompt.value.length > 0 && sourceImages.value.length > 0;
+    return prompt.value.length > 0 && prompt.value.length <= promptLimit.value;
+});
+
 // Watch for pending edits from other components (like ZoomModal)
 watch(pendingEditItem, async (newItem: any) => {
     if (newItem) {
@@ -409,12 +432,14 @@ watch(pendingEditItem, async (newItem: any) => {
     }
 }, { immediate: true });
 
-const isValid = computed(() => {
-    if (mode.value === "text2speech") return prompt.value.length > 0;
-    if (mode.value === "image-edit")
-        return prompt.value.length > 0 && sourceImages.value.length > 0;
-    return prompt.value.length > 0;
-});
+// Watch for prompt length and truncate if it exceeds the limit
+watch([prompt, promptLimit], ([newPrompt, newLimit]) => {
+    if (newLimit === Infinity) return; // No limit, skip
+    if (newPrompt.length > newLimit) {
+        prompt.value = newPrompt.substring(0, newLimit);
+        toast.warning(i18n.global.t("generate.promptTruncated", { limit: newLimit }));
+    }
+}, { immediate: true });
 
 const filteredParams = computed(() => {
     if (!selectedModel.value?.params) return {};

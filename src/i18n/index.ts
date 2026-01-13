@@ -50,6 +50,9 @@ const messages = {
         clearGenerations: "Clear all generations",
         generate: "Generate",
       },
+      promptLimit: "Characters",
+      promptExceeded: "Limit exceeded!",
+      promptTruncated: "Prompt truncated to {limit} characters",
     },
     library: {
       empty: "No items found in your library.",
@@ -136,6 +139,9 @@ const messages = {
         clearGenerations: "Limpiar todas las generaciones",
         generate: "Generar",
       },
+      promptLimit: "Caracteres",
+      promptExceeded: "¡Límite excedido!",
+      promptTruncated: "Prompt truncado a {limit} caracteres",
     },
     library: {
       empty: "No se encontraron elementos en tu biblioteca.",
