@@ -6,7 +6,7 @@
         <div
             v-for="item in sessionItems"
             :key="item.id"
-            class="flex gap-4 mt-1.5 mb-1.5 p-4 bg-neutral-50 rounded-2xl border"
+            class="flex gap-4 mt-1.5 mb-1.5 p-4 bg-sidebar rounded-2xl border"
         >
             <!-- Prompt Section -->
             <div class="flex-1 min-w-0">
