@@ -1,0 +1,352 @@
+# =============================================================================
+# Prompt Templates for SID Photography Toolkit
+# =============================================================================
+# Prompts are organized by tier (advanced/standard/basic) and mode (quick/standard/detailed/extreme)
+# Triple-quoted strings (""") allow multi-line prompts
+#
+# Z-IMAGE TURBO BEST PRACTICES:
+# - No negative prompts (guidance_scale=0) - all constraints go in positive prompt
+# - Structured format: Composition > Subject > Clothing > Environment > Lighting > Technical
+# - Use geometric face angles (front view, 45°, profile) not poetic descriptions
+# - Lighting keywords work exceptionally well
+# - Place cleanup constraints at the end (no text, no watermark)
+# - Natural language > tag soup
+
+
+# =============================================================================
+# PROMPT LENGTH CONFIGURATIONS
+# =============================================================================
+# Word count targets for each length setting
+
+[prompt_length]
+short = { min_words = 30, max_words = 60, description = "Quick overview (30-60 words)" }
+medium = { min_words = 80, max_words = 150, description = "Balanced detail (80-150 words)" }
+long = { min_words = 150, max_words = 250, description = "Comprehensive (150-250 words)" }
+free = { min_words = 0, max_words = 0, description = "No constraint - LLM decides" }
+
+
+# =============================================================================
+# SYSTEM PROMPTS - Set the model's role and behavior
+# =============================================================================
+
+[system.advanced]
+# For Claude, GPT-4, Gemini - full capability
+base = """You are an expert visual analyst generating prompts for Z-Image Turbo text-to-image AI.
+
+Z-Image CRITICAL RULES:
+- Use STRUCTURED format: composition → subject → clothing → environment → lighting → technical
+- Use GEOMETRIC face angles: "front view", "45° angle", "profile", "left-side half-face"
+- Describe lighting with specific keywords: "soft diffused daylight", "cinematic warm key light", "rim lighting"
+- Keep clothing descriptions minimal (3-5 words per item)
+- End with cleanup constraints: "no text, no watermark, no logos"
+- Write natural flowing sentences, NOT comma-separated tags
+- Be precise and direct, avoid poetic flourishes
+
+Output ONLY the prompt text - no explanations, no formatting, no markdown."""
+
+[system.standard]
+# For mid-tier models - slightly simplified
+base = """You are an image analysis expert creating prompts for Z-Image AI image generation.
+
+Follow this structure:
+1. Composition and framing (shot type, angle)
+2. Subject appearance (ethnicity, age, features)
+3. Clothing (3-5 words per item: color, material, style)
+4. Environment and background
+5. Lighting (use specific keywords like "soft natural light", "studio lighting")
+6. Technical (lens, depth of field)
+7. Cleanup: "no text, no watermark"
+
+Write flowing sentences, not tags. Output only the description."""
+
+[system.basic]
+# For local models like LLaVA, Moondream, Ollama - direct single-shot prompts
+base = """You are an image captioning assistant creating prompts for AI image generation.
+
+Write a flowing description covering:
+- Composition (shot type, camera angle)
+- Subject (appearance, expression)
+- Clothing (color, material, style - keep brief)
+- Setting (background, environment)
+- Lighting (describe light quality and direction)
+
+End with: "no text, no watermark"
+
+Output ONLY the description. Start directly - no "Here is" or "This image shows"."""
+
+
+# =============================================================================
+# PRESET STYLE ADDONS - Added to system prompt based on selected style
+# =============================================================================
+
+[styles.portrait]
+system_addon = "Focus heavily on facial features: face shape, expression, eye details, skin quality, makeup. Use geometric face angle (front view/45°/profile)."
+user_addon = "Emphasize the subject's face, expression, and upper body. Describe face angle geometrically."
+
+[styles.fashion]
+system_addon = "Focus on clothing details with minimal descriptions (3-5 words per item): type, color, material, fit. Include color palette keywords (warm/cool/muted/neon)."
+user_addon = "Describe each clothing item concisely: type, color, material. Add overall color palette."
+
+[styles.artistic]
+system_addon = "Focus on photographic qualities: composition style (rule of thirds/centered/symmetrical), lighting direction and quality, color palette and mood."
+user_addon = "Emphasize composition, lighting style (soft diffused/dramatic/rim), color tones, and atmosphere."
+
+[styles.nsfw]
+system_addon = "Include comprehensive body proportions and intimate apparel details. Be specific about all visible features, coverage levels, and exposure."
+user_addon = "Provide detailed body proportions, intimate apparel description, and coverage analysis."
+
+[styles.auto]
+# No addon - let the model decide
+system_addon = ""
+user_addon = ""
+
+
+# =============================================================================
+# LENGTH CONSTRAINT ADDONS - Added based on prompt_length setting
+# =============================================================================
+
+[length_constraints]
+short = "OUTPUT LENGTH: Write a SHORT prompt of 30-60 words. Be concise - only essential elements."
+medium = "OUTPUT LENGTH: Write a MEDIUM prompt of 80-150 words. Include key details with good flow."
+long = "OUTPUT LENGTH: Write a LONG prompt of 150-250 words. Be comprehensive and detailed."
+free = ""  # No constraint
+
+
+# =============================================================================
+# USER PROMPTS BY MODE - ADVANCED TIER (Claude, GPT-4, Gemini)
+# =============================================================================
+
+[user.advanced.quick]
+prompt = """Generate a brief Z-Image prompt (30-60 words) covering:
+- Shot type and face angle (geometric: front/45°/profile)
+- Subject basics (ethnicity, age, expression)
+- Clothing (one line)
+- Lighting keyword
+- End with "no text, no watermark"
+
+Write as flowing sentences, not tags."""
+
+[user.advanced.standard]
+prompt = """Generate a Z-Image prompt covering:
+FRAMING: Shot type (close-up/medium/full), which body parts visible vs cropped out, where frame cuts body, subject position using rule of thirds (left/center/right, upper/center/lower)
+COMPOSITION: Camera angle (geometric: eye level/high/low), depth of field, distance from camera
+SUBJECT: Ethnicity, age, gender, skin tone, face angle (front view/45°/profile)
+HAIR: Style, color, length (describe arrangement first)
+CLOTHING: Each item in 3-5 words (type, color, material)
+POSE: Body position, posture
+LIGHTING: Use specific keywords (soft diffused daylight, studio portrait lighting, rim lighting, etc.)
+BACKGROUND: Simple description
+
+Write as flowing natural sentences. End with "no text, no watermark, no logos"."""
+
+[user.advanced.detailed]
+prompt = """Generate a COMPREHENSIVE Z-Image prompt:
+
+FRAMING & VISIBILITY:
+- Shot type (ECU/CU/MCU/MS/MFS/FS/LS)
+- Body parts visible top-to-bottom: head, shoulders, chest, waist, hips, thighs, knees, lower legs, feet
+- Where does frame CUT OFF the body? (e.g., "cropped at mid-thigh", "frame cuts at waist")
+- Subject distance: fills frame / medium / far
+- Rule of thirds: horizontal position (left/center/right third), vertical position (upper/center/lower third)
+COMPOSITION: Camera angle (geometric terms), depth of field
+SUBJECT: Specific ethnicity, skin tone with undertones, age, gender, face angle (front/45°/profile)
+HAIR: Arrangement FIRST (updo/ponytail/loose), then color, texture, length
+FACE: Shape, expression, eye color and shape, makeup details
+BODY POSITIONING:
+- Shoulders: left shoulder position, right shoulder position (raised/lowered/level)
+- Arms: left arm position and hand placement, right arm position and hand placement
+- Legs (if visible): left leg position, right leg position
+CLOTHING: Each garment in 3-5 words (type, color, material, fit)
+INTIMATE APPAREL: If visible - style, coverage, material
+TATTOOS/ACCESSORIES: Location and details
+LIGHT & SHADOW:
+- Face: where highlights fall (forehead, cheekbones), where shadows fall (under eyes, jawline)
+- Body: highlight and shadow areas on chest/torso, arms
+- Overall direction and quality
+BACKGROUND: Type, color, blur level
+
+Write as flowing natural sentences. End with "correct human anatomy, no text, no watermark, no logos"."""
+
+[user.advanced.extreme]
+prompt = """Generate an EXTREMELY detailed Z-Image prompt with MAXIMUM precision.
+
+Analyze EVERY visible element:
+
+FRAMING & BODY VISIBILITY:
+- Shot type: ECU/BCU/CU/MCU/MS/MFS/FS/LS
+- Body parts visible (top to bottom): head, shoulders, chest, waist, hips, thighs, knees, lower legs, feet - which are FULLY visible, PARTIALLY cropped, or NOT visible?
+- EXACT frame cutoff: where does the frame cut the body? (e.g., "frame cuts at mid-thigh", "cropped just below waist")
+- Subject scale: does subject fill the frame, medium distance, or far?
+- Rule of thirds positioning:
+  * Horizontal: subject in left third, center, or right third?
+  * Vertical: subject in upper third, center, or lower third?
+  * Where do face/eyes fall relative to rule of thirds intersections?
+
+COMPOSITION: Geometric camera angle, depth of field style
+SUBJECT: Specific ethnicity, skin tone with undertones, approximate age
+HAIR: Arrangement style first, then exact color, texture, length
+FACE: Shape, geometric angle (front/45°/profile/etc), expression details
+EYES: Color, shape, gaze direction, makeup style
+BODY POSITIONING (describe each independently):
+  * Left shoulder: position, angle
+  * Right shoulder: position, angle
+  * Left arm: position, bend, hand placement
+  * Right arm: position, bend, hand placement
+  * Left leg (if visible): position, bend
+  * Right leg (if visible): position, bend
+  * Weight distribution
+ALL clothing with type, color, material (3-5 words each)
+ALL intimate apparel if visible with coverage details
+ALL tattoos with locations and styles
+ALL accessories and jewelry
+LIGHT & SHADOW ON BODY:
+  * Face: highlight areas (forehead, cheekbones, nose bridge), shadow areas (under eyes, jawline, neck)
+  * Chest/torso: where light hits, where shadows form
+  * Arms/hands: light and shadow placement
+  * Overall: main light direction, key/fill ratio, rim lighting presence, shadow color (warm/cool)
+BACKGROUND: Type, color palette, blur level
+
+Write as a comprehensive flowing narrative. End with "correct human anatomy, natural hands, no text, no watermark, no logos, sharp focus"."""
+
+
+# =============================================================================
+# USER PROMPTS BY MODE - STANDARD TIER (Together, Fireworks, Groq)
+# =============================================================================
+
+[user.standard.quick]
+prompt = """Describe this image in 30-60 words for Z-Image:
+- Shot type and angle
+- Subject appearance
+- Clothing (brief)
+- Lighting style
+End with "no text, no watermark"."""
+
+[user.standard.standard]
+prompt = """Describe this image for Z-Image covering:
+- Framing: shot type, which body parts visible vs cropped out, rule of thirds position (left/center/right)
+- Camera angle, depth of field
+- Subject appearance (ethnicity, age, expression)
+- Hair style and color
+- Clothing (color, material for each item)
+- Pose
+- Lighting style
+- Background
+
+Write flowing sentences. End with "no text, no watermark"."""
+
+[user.standard.detailed]
+prompt = """Describe this image in detail for Z-Image:
+- Framing: shot type, body parts visible (head, shoulders, chest, waist, legs, feet), where frame cuts body, subject position (left/center/right third, upper/center/lower third)
+- Composition: camera angle, subject distance (fills frame/medium/far), depth of field
+- Subject: ethnicity, skin tone, age, face angle
+- Hair: style, color, length
+- Face: shape, expression, makeup
+- Clothing: all items with colors and materials
+- Body positioning: left/right shoulder position, left/right arm position and hand placement, leg positions if visible
+- Light and shadow: where highlights fall on face, shadows under eyes/jawline, light on body
+- Lighting style: use keywords like "soft natural light", "studio lighting"
+- Background details
+
+Write comprehensively. End with "no text, no watermark, no logos"."""
+
+[user.standard.extreme]
+prompt = """Describe every visible detail for Z-Image:
+FRAMING: Shot type, which body parts are visible top-to-bottom (head/shoulders/chest/waist/hips/thighs/knees/legs/feet), where exactly frame cuts body, subject scale in frame, rule of thirds positioning (horizontal and vertical).
+Subject appearance, hair styling, facial features and angle, eye details, all clothing items with materials, body positioning (left shoulder, right shoulder, left arm with hand, right arm with hand, left leg, right leg - each independently), any tattoos or accessories, light and shadow analysis (highlights on forehead/cheeks, shadows under eyes/jawline, light on chest/arms), lighting style (specific keywords), and complete background analysis.
+
+Write the most detailed description possible. End with "correct human anatomy, no text, no watermark"."""
+
+
+# =============================================================================
+# USER PROMPTS BY MODE - BASIC TIER (Ollama, LM Studio, Local)
+# =============================================================================
+# For non-reasoning local models: direct instructions, no numbered lists,
+# explicit output format instructions
+
+[user.basic.quick]
+prompt = """Write a brief 30-50 word description of this image for AI generation.
+
+Example: "A medium shot of an adult Asian woman, front view, dark hair in ponytail, wearing white blouse and black pants, soft natural lighting, plain gray background, no text, no watermark."
+
+Describe this image in similar format:"""
+
+[user.basic.standard]
+prompt = """Write a description of this image for Z-Image AI generation.
+
+Include: shot type, subject appearance (ethnicity, age), face angle (front/side/45 degrees), hair style and color, clothing with colors and materials, pose, lighting style, background.
+
+Example: "A close-up portrait of an adult European woman, 45 degree angle view, shoulder-length blonde wavy hair, wearing a fitted navy blue blazer over white shirt, confident smile, soft diffused daylight from left, blurred office background, no text, no watermark."
+
+Describe this image:"""
+
+[user.basic.detailed]
+prompt = """Write a comprehensive description of this image for Z-Image AI generation.
+
+Cover: framing (shot type, body parts visible from top to bottom - head/shoulders/chest/waist/hips/thighs/knees/legs/feet, where frame cuts body, subject distance - fills frame/medium/far, rule of thirds position - left/center/right third, upper/center/lower third), camera angle, subject's appearance (ethnicity, skin tone, age), face angle (front view/profile/45 degrees), hair (style first, then color and length), facial expression and features, all visible clothing (type, color, material for each item), body positioning (describe left shoulder, right shoulder, left arm with hand, right arm with hand, legs if visible - each separately), light and shadow (where highlights fall on face, shadows under eyes/jawline, light on chest and arms), lighting style (describe quality and direction), background.
+
+Example: "A medium shot at eye level of an adult South Asian woman in her late twenties, visible from head to mid-thigh with frame cutting at upper thigh, subject fills center of frame positioned in center third horizontally and center third vertically, front view, warm olive skin tone, long black hair loose over shoulders, gentle smile with brown eyes, left shoulder slightly raised, right shoulder relaxed and lowered, left arm bent with hand on hip, right arm hanging naturally at side, wearing fitted emerald green silk dress with thin straps, soft highlights on forehead and cheekbones with gentle shadows under eyes and along jawline, warm light on chest and upper arms, soft diffused daylight from large window creating warm glow, shallow depth of field, cream-colored wall background, no text, no watermark."
+
+Describe this image in similar detail:"""
+
+[user.basic.extreme]
+prompt = """Write the most detailed description possible of this image for Z-Image AI generation.
+
+Describe everything: FRAMING (shot type, body parts visible top-to-bottom - head/shoulders/chest/waist/hips/thighs/knees/lower legs/feet - which are fully visible, partially cropped, or not visible, where exactly frame cuts the body, subject scale - fills frame/medium distance/far, rule of thirds - horizontal position left/center/right third, vertical position upper/center/lower third), precise camera angle, subject's complete appearance (specific ethnicity, skin tone, approximate age), face angle in geometric terms (front view/45 degree left/profile), hair (arrangement first - updo/ponytail/loose, then color, texture, length), facial features (shape, expression, eye color and details, makeup), ALL clothing items (type, color, material, fit for each), BODY POSITIONING for each limb separately (left shoulder position, right shoulder position, left arm position and hand placement, right arm position and hand placement, left leg position, right leg position), LIGHT AND SHADOW on body (highlight areas on face like forehead and cheekbones, shadow areas like under eyes and jawline, light on chest, light on arms), any tattoos or accessories with locations, lighting keywords (like "soft diffused daylight" or "studio portrait lighting"), background details.
+
+Start directly with "A..." - write one flowing paragraph. End with "correct human anatomy, no text, no watermark":"""
+
+
+# =============================================================================
+# AGENTIC PROMPTS - For reasoning-enabled multi-step analysis
+# =============================================================================
+
+[agentic.advanced]
+# Full agentic prompt for advanced models
+intro = """You are performing a comprehensive visual analysis for Z-Image prompt generation.
+
+Z-Image requires:
+- Structured format: composition → subject → details → lighting
+- Geometric face angles (front view, 45°, profile)
+- Specific lighting keywords (soft diffused daylight, cinematic warm key, rim lighting)
+- Minimal clothing descriptions (3-5 words each)
+- Cleanup constraints at end
+
+Analyze each component separately, then synthesize into a flowing prompt."""
+
+synthesis = """Now combine all analysis into a single flowing Z-Image prompt.
+
+Structure: Shot type → Camera angle → Subject demographics → Hair → Face angle → Expression → Clothing → Pose → Lighting → Background
+
+Use geometric terms for face angles. Use specific lighting keywords.
+End with "correct human anatomy, no text, no watermark, no logos".
+
+Output ONLY the final prompt text."""
+
+[agentic.standard]
+intro = """Analyze this image step by step for Z-Image prompt generation.
+Focus on: composition, subject, clothing, lighting, background.
+Use geometric face angles and specific lighting keywords."""
+
+synthesis = """Combine your analysis into a flowing Z-Image prompt.
+Structure: composition → subject → clothing → lighting → background.
+End with "no text, no watermark".
+Output only the final prompt."""
+
+[agentic.basic]
+# Simplified for local models - single pass instead of multi-step
+# Local models don't benefit from multi-step reasoning, use direct prompts
+intro = """Write a detailed description of this image for Z-Image AI generation. Include shot type, subject appearance, face angle, clothing, pose, lighting, and background. Start directly - no introduction needed."""
+
+synthesis = """Write the final description as a single flowing paragraph. Use geometric face angles (front view/45°/profile). End with "no text, no watermark". Start directly with "A..." or the subject description."""
+
+
+# =============================================================================
+# LIGHTING KEYWORDS LIBRARY (for reference)
+# =============================================================================
+# These lighting keywords work exceptionally well with Z-Image:
+#
+# Natural: soft diffused daylight, golden hour warm light, overcast soft light
+# Studio: studio portrait lighting, three-point lighting, soft box lighting
+# Dramatic: cinematic warm key light, high-contrast noir lighting, rim lighting
+# Creative: split lighting, Rembrandt lighting, butterfly lighting, top-down spotlight
+# Mood: cool ambient light, warm candlelight, neon glow, backlit silhouette
