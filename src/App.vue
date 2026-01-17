@@ -99,9 +99,7 @@
 
                 <div v-else-if="activeTab === 'library'" key="library">
                     <div class="flex items-center justify-between mb-8">
-                        <h1 class="text-3xl font-bold tracking-tight">
-                            {{ $t("common.library") }}
-                        </h1>
+                        <h1 class="text-3xl font-bold tracking-tight"></h1>
                         <div class="flex items-center gap-4">
                             <span
                                 class="text-xs font-mono text-muted-foreground"
@@ -114,7 +112,7 @@
                             <button
                                 v-if="items.length > 0"
                                 @click="clearLibrary"
-                                class="flex items-center gap-2 px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                                class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm transition-all"
                             >
                                 <Trash2 class="w-4 h-4" />
                                 {{ $t("actions.deleteAll") }}

@@ -89,6 +89,23 @@ export const useHistoryStore = defineStore("history", () => {
     );
   }
 
+  async function migrateTimestamps(): Promise<number> {
+    if (!db) await initDB();
+    const allItems = await db!.getAll(STORE_NAME);
+    let migrated = 0;
+
+    for (const item of allItems) {
+      if (typeof item.timestamp === 'string') {
+        const updated = { ...item, timestamp: new Date(item.timestamp) };
+        await db!.put(STORE_NAME, updated);
+        migrated++;
+      }
+    }
+
+    await loadItems();
+    return migrated;
+  }
+
   async function addItem(item: Omit<HistoryItem, "timestamp">, blob: Blob) {
     if (!db) await initDB();
     const fullItem: HistoryItem = { ...item, timestamp: new Date() };
@@ -195,6 +212,106 @@ export const useHistoryStore = defineStore("history", () => {
     }
   }
 
+  async function exportProject(): Promise<void> {
+    if (!db) await initDB();
+
+    const allItems = await db!.getAll(STORE_NAME);
+    const blobs: Record<string, string> = {};
+    const thumbnails: Record<string, string> = {};
+
+    for (const item of allItems) {
+      const blob = await db!.get(BLOB_STORE, item.id);
+      if (blob) {
+        blobs[item.id] = await blobToBase64(blob);
+      }
+
+      const thumb = await db!.get(THUMB_STORE, item.id);
+      if (thumb) {
+        thumbnails[item.id] = await blobToBase64(thumb);
+      }
+    }
+
+    const exportData = {
+      version: 1,
+      exportDate: new Date().toISOString(),
+      items: allItems,
+      blobs,
+      thumbnails
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pixeo-export-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function importProject(file: File): Promise<{ imported: number; skipped: number }> {
+    if (!db) await initDB();
+
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    if (data.version !== 1) {
+      throw new Error('Versión de archivo no compatible');
+    }
+
+    const existingIds = new Set((await db!.getAllKeys(STORE_NAME)).map(k => k as string));
+    let imported = 0;
+    let skipped = 0;
+
+    for (const item of data.items) {
+      if (existingIds.has(item.id)) {
+        skipped++;
+        continue;
+      }
+
+      const itemWithDate = {
+        ...item,
+        timestamp: new Date(item.timestamp)
+      };
+      await db!.put(STORE_NAME, itemWithDate);
+
+      if (data.blobs && data.blobs[item.id]) {
+        const blob = base64ToBlob(data.blobs[item.id]);
+        await db!.put(BLOB_STORE, blob, item.id);
+      }
+
+      if (data.thumbnails && data.thumbnails[item.id]) {
+        const thumb = base64ToBlob(data.thumbnails[item.id]);
+        await db!.put(THUMB_STORE, thumb, item.id);
+      }
+
+      imported++;
+    }
+
+    await loadItems();
+    return { imported, skipped };
+  }
+
+  async function blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function base64ToBlob(base64: string): Blob {
+    const arr = base64.split(',');
+    const mime = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  }
+
   return {
     items,
     sessionItems,
@@ -205,7 +322,10 @@ export const useHistoryStore = defineStore("history", () => {
     clearAll,
     clearOrphanedThumbnails,
     regenerateThumbnails,
+    exportProject,
+    importProject,
     initDB,
     clearSession,
+    migrateTimestamps,
   };
 });
