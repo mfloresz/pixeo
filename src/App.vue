@@ -40,7 +40,7 @@
                                     class="hidden md:flex flex-col items-end text-[10px] text-muted-foreground mr-2 cursor-help"
                                 >
                                     <span class="font-mono">{{
-                                        $t("common.usageQuota", { used, quota })
+                                        $t("common.usageQuota", { used: usedDisplay, quota })
                                     }}</span>
                                     <div
                                         class="w-24 h-1 bg-muted rounded-full overflow-hidden mt-1"
@@ -192,7 +192,12 @@ import {
 const configStore = useConfigStore();
 const historyStore = useHistoryStore();
 const modelsStore = useModelsStore();
-const { apiKey, quota, used } = storeToRefs(configStore);
+const { apiKey, quota } = storeToRefs(configStore);
+const { used } = storeToRefs(configStore);
+
+const usedDisplay = computed(() => {
+    return Math.trunc(used.value * 10) / 10;
+});
 const { items, sessionItems } = storeToRefs(historyStore);
 
 function getTimeUntilReset(): string {
