@@ -27,10 +27,10 @@
 
 ## ⚠️ Project Status
 
-- **Image Generation**: ✅ Fully tested and working
-- **Image Editing**: In development
-- **Video Generation**: In development
-- **Text to Speech**: In development
+- **Image Generation**: ✅ Working
+- **Image Editing**: ✅ Working
+- **Video Generation**: Not Tested
+- **Text to Speech**: Not Tested
 
 > **Note**: Some models may be outdated. If you find any model that doesn't work properly, please report it.
 

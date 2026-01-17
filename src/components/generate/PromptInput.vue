@@ -632,12 +632,14 @@ async function generate() {
 
         // Detailed logging as requested
         const redactor = (key: string, value: any) => {
+            if (key === "image_b64s" && Array.isArray(value)) {
+                return `[${value.length} image${value.length !== 1 ? "s" : ""}]`;
+            }
             if (
                 typeof value === "string" &&
                 (key.includes("b64") ||
                     key === "image" ||
-                    key === "img_b64" ||
-                    key === "image_b64s")
+                    key === "img_b64")
             ) {
                 return value.length > 50
                     ? `${value.substring(0, 50)}... [truncated]`
