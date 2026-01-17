@@ -1,13 +1,10 @@
 <div align="center">
   <img src="docs/images/app.png" width="150" height="150" alt="App Icon" />
-  <h1>Pixeor</h1>
+  <h1>Pixeo</h1>
   <p>
     <b>A modern web application for generating images, editing images, and creating videos using the Chutes AI platform. Built with Vue 3, TypeScript, and Tailwind CSS.</b>
   </p>
 </div>
-
-
-> **Inspiration**: This project is based on the original idea from [chutes-img-ui](https://github.com/MagicGoddess/chutes-img-ui).
 
 ## 📸 Screenshots
 
@@ -186,6 +183,7 @@ Models are configured in `src/config/models_data.ts`. Each model includes:
 ### Resolution Customization
 See `src/config/custom_resolutions.md` to learn how to define custom resolutions.
 
+> This project is based on the original idea from [chutes-img-ui](https://github.com/MagicGoddess/chutes-img-ui).
 ---
 
 ## 💡 Technical Note
