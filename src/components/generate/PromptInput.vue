@@ -677,7 +677,6 @@ async function generate() {
             blob,
         );
 
-        toast.success(i18n.global.t("generate.success"));
         configStore.addLog({
             type: mode.value,
             message: i18n.global.t("logs.generationSuccess", {
@@ -687,7 +686,17 @@ async function generate() {
         configStore.refreshQuota();
     } catch (err: any) {
         console.error(err);
-        toast.error(`Error: ${err.message}`);
+        let errorMessage = err.message;
+        try {
+            const match = err.message.match(/API Error: \d+ - (.+)/);
+            if (match && match[1]) {
+                const jsonPart = JSON.parse(match[1]);
+                if (jsonPart.detail) {
+                    errorMessage = jsonPart.detail;
+                }
+            }
+        } catch {}
+        toast.error(errorMessage);
         configStore.addLog({
             type: mode.value,
             message: `Error: ${err.message}`,
