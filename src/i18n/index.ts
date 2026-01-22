@@ -86,8 +86,10 @@ const messages = {
       copy: "Copy",
       downloadContent: "Download Content",
       deleteAll: "Delete All",
+      exportAll: "Export All",
       deleteAllConfirm:
         "Are you sure you want to delete all items? This action cannot be undone.",
+      exportAllSuccess: "Exported {count} items successfully",
     },
     logs: {
       promptOptimized: "[{model}] Prompt optimized",
@@ -185,8 +187,10 @@ const messages = {
       copy: "Copiar",
       downloadContent: "Descargar Contenido",
       deleteAll: "Eliminar Todo",
+      exportAll: "Exportar Todo",
       deleteAllConfirm:
         "¿Estás seguro de que quieres eliminar todos los elementos? Esta acción no se puede deshacer.",
+      exportAllSuccess: "Exportados {count} elementos exitosamente",
     },
     logs: {
       promptOptimized: "[{model}] Prompt optimizado",

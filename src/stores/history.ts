@@ -312,6 +312,33 @@ export const useHistoryStore = defineStore("history", () => {
     return new Blob([u8arr], { type: mime });
   }
 
+  async function exportAllAsZip(): Promise<void> {
+    if (!db) await initDB();
+
+    const allItems = await db!.getAll(STORE_NAME);
+    if (allItems.length === 0) return;
+
+    const JSZip = (await import("jszip")).default;
+    const zip = new JSZip();
+
+    for (const item of allItems) {
+      const blob = await db!.get(BLOB_STORE, item.id);
+      if (blob) {
+        const extension = blob.type.split('/')[1] || 'png';
+        const filename = `${item.prompt?.substring(0, 50) || 'image'}_${item.id}.${extension}`;
+        zip.file(filename, blob);
+      }
+    }
+
+    const content = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(content);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pixeo-images-${new Date().toISOString().slice(0, 10)}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return {
     items,
     sessionItems,
@@ -324,6 +351,7 @@ export const useHistoryStore = defineStore("history", () => {
     regenerateThumbnails,
     exportProject,
     importProject,
+    exportAllAsZip,
     initDB,
     clearSession,
     migrateTimestamps,

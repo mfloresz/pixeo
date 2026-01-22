@@ -40,7 +40,10 @@
                                     class="hidden md:flex flex-col items-end text-[10px] text-muted-foreground mr-2 cursor-help"
                                 >
                                     <span class="font-mono">{{
-                                        $t("common.usageQuota", { used: usedDisplay, quota })
+                                        $t("common.usageQuota", {
+                                            used: usedDisplay,
+                                            quota,
+                                        })
                                     }}</span>
                                     <div
                                         class="w-24 h-1 bg-muted rounded-full overflow-hidden mt-1"
@@ -111,6 +114,14 @@
                             >
                             <button
                                 v-if="items.length > 0"
+                                @click="exportAllAsZip"
+                                class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm transition-all"
+                            >
+                                <Download class="w-4 h-4" />
+                                {{ $t("actions.exportAll") }}
+                            </button>
+                            <button
+                                v-if="items.length > 0"
                                 @click="clearLibrary"
                                 class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm transition-all"
                             >
@@ -171,7 +182,7 @@ import { i18n } from "./i18n";
 const { t } = i18n.global;
 import { storeToRefs } from "pinia";
 import { nextTick } from "vue";
-import { Image, Settings, Library, Trash2 } from "lucide-vue-next";
+import { Image, Settings, Library, Trash2, Download } from "lucide-vue-next";
 import Toaster from "./components/ui/Toaster.vue";
 import { useConfigStore } from "./stores/config";
 import { useHistoryStore } from "./stores/history";
@@ -238,6 +249,12 @@ async function clearLibrary() {
         await historyStore.clearAll();
         toast.success(t("library.deletedAll") || "All items deleted");
     }
+}
+
+async function exportAllAsZip() {
+    if (items.value.length === 0) return;
+    await historyStore.exportAllAsZip();
+    toast.success(t("actions.exportAllSuccess", { count: items.value.length }) || `Exported ${items.value.length} items successfully`);
 }
 
 const activeTab = ref("generate");
