@@ -112,13 +112,22 @@
                             </div>
                         </div>
                         <div class="pt-4 border-t border-white/5 space-y-2">
-                            <button
-                                @click="edit"
-                                class="w-full flex items-center justify-center gap-2 bg-secondary text-secondary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
-                            >
-                                <Edit3 class="w-4 h-4" />
-                                {{ editLabel }}
-                            </button>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button
+                                    @click="edit"
+                                    class="flex items-center justify-center gap-2 bg-secondary text-secondary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg text-sm"
+                                >
+                                    <Edit3 class="w-4 h-4" />
+                                    {{ editLabel }}
+                                </button>
+                                <button
+                                    @click="enhance"
+                                    class="flex items-center justify-center gap-2 bg-secondary text-secondary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg text-sm"
+                                >
+                                    <Wand2 class="w-4 h-4" />
+                                    {{ enhanceLabel }}
+                                </button>
+                            </div>
                             <button
                                 @click="download"
                                 class="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20"
@@ -137,12 +146,13 @@
 <script setup lang="ts">
 import { computed, ref, type PropType } from "vue";
 import { useI18n } from "vue-i18n";
-import { X, Download, Mic, Copy, Check, Edit3 } from "lucide-vue-next";
+import { X, Download, Mic, Copy, Check, Edit3, Wand2 } from "lucide-vue-next";
 import type { HistoryItem } from "@/types";
 
 const { t } = useI18n();
 
 const editLabel = computed(() => t("common.edit"));
+const enhanceLabel = computed(() => t("common.enhance"));
 const downloadLabel = computed(() => t("actions.download"));
 
 const props = defineProps({
@@ -156,6 +166,7 @@ const emit = defineEmits({
     download: null,
     // edit emits the HistoryItem and its optional blob URL
     edit: (item: any, blobUrl: string | null) => true,
+    enhance: (item: any, blobUrl: string | null) => true,
 });
 
 const copied = ref(false);
@@ -169,6 +180,10 @@ function download() {
 
 function edit() {
     emit("edit", props.item, props.blobUrl);
+}
+
+function enhance() {
+    emit("enhance", props.item, props.blobUrl);
 }
 
 async function copyPrompt() {

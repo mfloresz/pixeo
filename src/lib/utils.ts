@@ -26,3 +26,10 @@ export function sanitizeBase64(b64: string): string {
 
   return sanitized;
 }
+
+export function downloadImage(url: string, filename: string = `pixeo-${Date.now()}`) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+}

@@ -8,18 +8,19 @@
 
 ## 📸 Screenshots
 
-| Image Generation | Library | Settings | Zoom Modal |
-|------------------------|---------------|---------------|---------------|
-| ![Generate](./docs/images/generate.jpeg) | ![Library](./docs/images/library.jpeg) | ![Settings](./docs/images/settings.jpeg) | ![Zoom Modal](./docs/images/preview.jpg) |
+| Image Generation | Inpaint/Enhance | Library | Settings | Zoom Modal |
+|------------------------|-----------------|---------------|---------------|---------------|
+| ![Generate](./docs/images/generate.jpeg) | ![Enhance](./docs/images/enhace.jpeg) | ![Library](./docs/images/library.jpeg) | ![Settings](./docs/images/settings.jpeg) | ![Zoom Modal](./docs/images/preview.jpg) |
 
 ## ✨ Features
 
 - **Image Generation**: Create high-quality images using advanced AI models like Z Image Turbo, Qwen Image, FLUX.1 Dev, and more.
 - **Image Editing**: Edit existing images with specialized models like Qwen Image Edit.
+- **Inpaint/Enhance**: Locally enhance and edit images by drawing masks and using AI-powered inpainting with ONNX models in the browser.
 - **Video Generation**: Create videos from text or images with models like Wan2.1 14B Video.
 - **Text to Speech**: Convert text to audio with TTS models like Kokoro and CSM 1B.
 - **Personal Library**: Store and manage all your generated content locally.
-- **Intuitive Interface**: Modern design with three main tabs: Generate/Edit, Library, and Settings.
+- **Intuitive Interface**: Modern design with four main tabs: Generate/Edit, Inpaint/Enhance, Library, and Settings.
 - **Multi-language Support**: Available in Spanish and English.
 - **Local Storage**: Uses IndexedDB to save content without needing a server.
 - **Real-time Notifications**: Receive immediate feedback on your generation progress.
@@ -29,6 +30,7 @@
 
 - **Image Generation**: ✅ Working
 - **Image Editing**: ✅ Working
+- **Inpaint/Enhance**: ✅ Working
 - **Video Generation**: Not Tested
 - **Text to Speech**: Not Tested
 
@@ -94,6 +96,16 @@ bun run dev
 6. (Optional) Enable "Optimize Prompt" if available for the selected model
 7. Click "Generate"
 
+### Enhance Images (Inpaint)
+1. Go to the **Library** tab and zoom into any generated image
+2. Click the **Enhance** button in the zoom modal
+3. The image will load into the **Inpaint/Enhance** tab
+4. Draw masks on areas you want to enhance or modify
+5. Adjust brush size as needed
+6. The AI will process the image locally in your browser using ONNX models
+7. Compare original and enhanced versions with the toggle
+8. Download the enhanced result
+
 ### Prompt Optimization
 Some models support automatic prompt optimization through specialized AI experts. When enabled, the original prompt is analyzed and rewritten to enhance visual details, properly handle text content in images, and specify artistic style appropriately.
 
@@ -118,12 +130,13 @@ The optimization configuration is located in `src/config/optimize_prompts.json`.
 src/
 ├── components/          # Reusable Vue components
 │   ├── generate/        # Generation components
+│   ├── inpaint/         # Inpaint/enhance components
 │   ├── library/         # Library components
 │   └── settings/        # Settings components
 ├── config/              # Model and resolution configurations
 ├── i18n/                # Internationalization files
 ├── lib/                 # Utilities and helpers
-├── services/            # API services (Chutes AI)
+├── services/            # API services (Chutes AI) and inpaint processor
 ├── stores/              # Global state with Pinia
 └── types/               # TypeScript definitions
 ```

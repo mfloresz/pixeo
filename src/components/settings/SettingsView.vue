@@ -63,18 +63,54 @@
                     $t("settings.storage")
                 }}</label>
                 <div class="flex gap-2 flex-wrap">
-                    <button
-                        @click="regenerateThumbnails"
-                        class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm font-bold transition-all"
-                    >
-                        {{ $t("settings.regenerateThumbnails") }}
-                    </button>
-                    <button
-                        @click="clearOrphanedThumbnails"
-                        class="px-4 py-2 bg-muted hover:bg-muted/80 rounded-xl text-sm font-bold transition-all"
-                    >
-                        {{ $t("settings.clearThumbnails") }}
-                    </button>
+                    <AlertDialog>
+                        <AlertDialogTrigger as-child>
+                            <button
+                                class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm font-bold transition-all"
+                            >
+                                {{ $t("settings.regenerateThumbnails") }}
+                            </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Regenerar miniaturas?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    {{ $t("settings.regenerateConfirm") }}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction @click="regenerateThumbnails">
+                                    Continuar
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+
+                    <AlertDialog>
+                        <AlertDialogTrigger as-child>
+                            <button
+                                class="px-4 py-2 bg-muted hover:bg-muted/80 rounded-xl text-sm font-bold transition-all"
+                            >
+                                {{ $t("settings.clearThumbnails") }}
+                            </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Limpiar huérfanos?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    {{ $t("settings.clearCacheConfirm") }}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction @click="clearOrphanedThumbnails" class="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    Limpiar
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+
                     <button
                         @click="migrateTimestamps"
                         class="px-4 py-2 bg-muted hover:bg-muted/80 rounded-xl text-sm font-bold transition-all"
@@ -181,9 +217,21 @@
 import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
+import { toast } from "vue-sonner";
 import { Sun, Moon, Monitor, Download, Upload } from "lucide-vue-next";
 import { useConfigStore } from "../../stores/config";
 import { useHistoryStore } from "../../stores/history";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 const { t } = useI18n();
 const configStore = useConfigStore();
@@ -197,23 +245,20 @@ function formatDate(date: Date) {
 }
 
 async function regenerateThumbnails() {
-    if (confirm(t("settings.regenerateConfirm"))) {
-        await historyStore.regenerateThumbnails();
-        alert(t("settings.regenerateDone"));
-    }
+    await historyStore.regenerateThumbnails();
+    toast.success(t("settings.regenerateDone"));
 }
 
 async function clearOrphanedThumbnails() {
-    if (confirm(t("settings.clearCacheConfirm"))) {
-        await historyStore.clearOrphanedThumbnails();
-        alert(t("settings.clearCacheDone"));
-    }
+    await historyStore.clearOrphanedThumbnails();
+    toast.success(t("settings.clearCacheDone"));
 }
 
 async function migrateTimestamps() {
     const migrated = await historyStore.migrateTimestamps();
     if (migrated > 0) {
         migrateResult.value = t("settings.migrateSuccess", { count: migrated });
+        toast.success(migrateResult.value);
     } else {
         migrateResult.value = t("settings.migrateNoItems");
     }
@@ -231,9 +276,13 @@ async function importProject(event: Event) {
     try {
         const result = await historyStore.importProject(input.files[0]);
         importResult.value = result;
+        toast.success(t("settings.importSuccess", { 
+            imported: result.imported, 
+            skipped: result.skipped 
+        }));
         setTimeout(() => (importResult.value = null), 5000);
     } catch (error) {
-        alert(t("settings.importError", { error: (error as Error).message }));
+        toast.error(t("settings.importError", { error: (error as Error).message }));
     }
     input.value = "";
 }

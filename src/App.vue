@@ -1,6 +1,6 @@
 <template>
     <div
-        class="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20"
+        class="min-h-screen h-screen flex flex-col bg-background text-foreground font-sans selection:bg-primary/20"
     >
         <!-- Navbar -->
         <header
@@ -73,7 +73,10 @@
         </header>
 
         <main
-            class="container mx-auto px-4 py-8 md:px-8 min-h-[calc(100vh-m)] pb-32"
+            :class="[
+                'flex-1 min-h-0 overflow-hidden',
+                activeTab === 'inpaint' ? 'w-full' : 'container mx-auto px-4 py-8 md:px-8 pb-32 overflow-y-auto'
+            ]"
         >
             <Transition name="fade" mode="out-in">
                 <div
@@ -100,6 +103,10 @@
                     </div>
                 </div>
 
+                <div v-else-if="activeTab === 'inpaint'" key="inpaint" class="h-full">
+                    <InpaintView />
+                </div>
+
                 <div v-else-if="activeTab === 'library'" key="library">
                     <div class="flex items-center justify-between mb-8">
                         <h1 class="text-3xl font-bold tracking-tight"></h1>
@@ -120,14 +127,31 @@
                                 <Download class="w-4 h-4" />
                                 {{ $t("actions.exportAll") }}
                             </button>
-                            <button
-                                v-if="items.length > 0"
-                                @click="clearLibrary"
-                                class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm transition-all"
-                            >
-                                <Trash2 class="w-4 h-4" />
-                                {{ $t("actions.deleteAll") }}
-                            </button>
+                            <AlertDialog>
+                                <AlertDialogTrigger as-child>
+                                    <button
+                                        v-if="items.length > 0"
+                                        class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm transition-all flex items-center gap-2"
+                                    >
+                                        <Trash2 class="w-4 h-4" />
+                                        {{ $t("actions.deleteAll") }}
+                                    </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>¿Eliminar todo?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            {{ $t("actions.deleteAllConfirm") }}
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction @click="clearLibrary" class="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                            Eliminar Todo
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </div>
                     </div>
                     <div
@@ -167,6 +191,7 @@
                     downloadItem(selectedZoomBlobUrl, selectedZoomItem?.id)
                 "
                 @edit="handleEdit"
+                @enhance="handleEnhance"
             />
         </main>
     </div>
@@ -176,13 +201,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { toast } from "vue-sonner";
 import { i18n } from "./i18n";
 const { t } = i18n.global;
 import { storeToRefs } from "pinia";
 import { nextTick } from "vue";
-import { Image, Settings, Library, Trash2, Download } from "lucide-vue-next";
+import { Image, Settings, Library, Trash2, Download, Wand2 } from "lucide-vue-next";
 import Toaster from "./components/ui/Toaster.vue";
 import { useConfigStore } from "./stores/config";
 import { useHistoryStore } from "./stores/history";
@@ -193,12 +218,25 @@ import SettingsView from "./components/settings/SettingsView.vue";
 import LibraryItem from "./components/library/LibraryItem.vue";
 import ZoomModal from "./components/zoom/ZoomModal.vue";
 import GenerationHistory from "./components/generate/GenerationHistory.vue";
+import InpaintView from "./components/inpaint/InpaintView.vue";
+import { useInpaintStore } from "./stores/inpaint";
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from "./components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 const configStore = useConfigStore();
 const historyStore = useHistoryStore();
@@ -225,7 +263,7 @@ function getTimeUntilReset(): string {
 
 const timeUntilReset = ref(getTimeUntilReset());
 
-let timeUpdateInterval: number;
+let timeUpdateInterval: NodeJS.Timeout;
 
 onMounted(() => {
     configStore.theme = configStore.theme;
@@ -245,10 +283,8 @@ onUnmounted(() => {
 
 async function clearLibrary() {
     if (items.value.length === 0) return;
-    if (confirm(String(t("actions.deleteAllConfirm")))) {
-        await historyStore.clearAll();
-        toast.success(t("library.deletedAll") || "All items deleted");
-    }
+    await historyStore.clearAll();
+    toast.success(t("library.deletedAll") || "All items deleted");
 }
 
 async function exportAllAsZip() {
@@ -261,7 +297,6 @@ const activeTab = ref("generate");
 const showZoom = ref(false);
 const selectedZoomItem = ref<HistoryItem | null>(null);
 const selectedZoomBlobUrl = ref<string | null>(null);
-const promptInputRef = ref<InstanceType<typeof PromptInput> | null>(null);
 
 async function openZoom(item: HistoryItem) {
     selectedZoomItem.value = item;
@@ -288,6 +323,7 @@ function closeZoom() {
 
 const tabs = [
     { id: "generate", icon: Image },
+    { id: "inpaint", icon: Wand2 },
     { id: "library", icon: Library },
     { id: "settings", icon: Settings },
 ];
@@ -300,11 +336,7 @@ function downloadItem(blobUrl: string | null, id?: string) {
     a.click();
 }
 
-function toggleTheme() {
-    const themes = ["dark", "light", "system"];
-    const currentIndex = themes.indexOf(configStore.theme);
-    configStore.theme = themes[(currentIndex + 1) % themes.length];
-}
+
 
 async function handleEdit(item: HistoryItem, blobUrl: string | null) {
     // Set mode to image‑edit and select the correct model
@@ -338,6 +370,51 @@ async function handleEdit(item: HistoryItem, blobUrl: string | null) {
     }
 
     // Finally close the zoom modal (revokes temporary blob URL)
+    closeZoom();
+}
+
+async function handleEnhance(item: HistoryItem, blobUrl: string | null) {
+    const inpaintStore = useInpaintStore();
+
+    // Get the image blob
+    let blob: Blob | null = null;
+    if (blobUrl) {
+        try {
+            const response = await fetch(blobUrl);
+            blob = await response.blob();
+        } catch (e) {
+            console.error("Failed to fetch blobUrl", e);
+        }
+    }
+
+    if (!blob) {
+        blob = await historyStore.getBlob(item.id);
+    }
+
+    if (!blob) {
+        toast.error("No se pudo obtener la imagen");
+        return;
+    }
+
+    // Convert blob to File for store compatibility
+    const file = new File([blob], `pixeo-${item.id}.png`, { type: "image/png" });
+    
+    // Set in inpaint store
+    inpaintStore.setImageFile(file);
+
+    // Create Image object for store originalImage
+    const img = new window.Image();
+    const url = URL.createObjectURL(blob);
+    img.src = url;
+    await new Promise((resolve) => {
+        img.onload = resolve;
+    });
+    inpaintStore.setOriginalImage(img);
+
+    // Switch to inpaint tab
+    activeTab.value = "inpaint";
+
+    // Close zoom modal
     closeZoom();
 }
 </script>
