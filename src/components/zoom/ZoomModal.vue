@@ -20,7 +20,7 @@
                     class="flex-3 bg-black/5 flex items-center justify-center p-4 overflow-hidden border-r"
                 >
                     <img
-                        v-if="item.type === 'image'"
+                        v-if="item.type === 'image' || item.type === 'canva'"
                         :src="blobUrl || undefined"
                         class="max-w-full max-h-full object-contain shadow-2xl rounded-lg"
                     />
@@ -112,29 +112,42 @@
                             </div>
                         </div>
                         <div class="pt-4 border-t border-white/5 space-y-2">
-                            <div class="grid grid-cols-2 gap-2">
-                                <button
-                                    @click="edit"
-                                    class="flex items-center justify-center gap-2 bg-secondary text-secondary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg text-sm"
-                                >
-                                    <Edit3 class="w-4 h-4" />
-                                    {{ editLabel }}
-                                </button>
-                                <button
-                                    @click="enhance"
-                                    class="flex items-center justify-center gap-2 bg-secondary text-secondary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg text-sm"
-                                >
-                                    <Wand2 class="w-4 h-4" />
-                                    {{ enhanceLabel }}
-                                </button>
-                            </div>
+                            <!-- Canva-specific button -->
                             <button
-                                @click="download"
+                                v-if="item.type === 'canva'"
+                                @click="openInCanva"
                                 class="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20"
                             >
-                                <Download class="w-4 h-4" />
-                                {{ downloadLabel }}
+                                <Palette class="w-4 h-4" />
+                                {{ openInCanvaLabel }}
                             </button>
+                            
+                            <!-- Standard buttons for non-Canva items -->
+                            <template v-else>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button
+                                        @click="edit"
+                                        class="flex items-center justify-center gap-2 bg-secondary text-secondary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg text-sm"
+                                    >
+                                        <Edit3 class="w-4 h-4" />
+                                        {{ editLabel }}
+                                    </button>
+                                    <button
+                                        @click="enhance"
+                                        class="flex items-center justify-center gap-2 bg-secondary text-secondary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg text-sm"
+                                    >
+                                        <Wand2 class="w-4 h-4" />
+                                        {{ enhanceLabel }}
+                                    </button>
+                                </div>
+                                <button
+                                    @click="download"
+                                    class="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20"
+                                >
+                                    <Download class="w-4 h-4" />
+                                    {{ downloadLabel }}
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -146,7 +159,7 @@
 <script setup lang="ts">
 import { computed, ref, type PropType } from "vue";
 import { useI18n } from "vue-i18n";
-import { X, Download, Mic, Copy, Check, Edit3, Wand2 } from "lucide-vue-next";
+import { X, Download, Mic, Copy, Check, Edit3, Wand2, Palette } from "lucide-vue-next";
 import type { HistoryItem } from "@/types";
 
 const { t } = useI18n();
@@ -154,6 +167,7 @@ const { t } = useI18n();
 const editLabel = computed(() => t("common.edit"));
 const enhanceLabel = computed(() => t("common.enhance"));
 const downloadLabel = computed(() => t("actions.download"));
+const openInCanvaLabel = computed(() => t("actions.openInCanva"));
 
 const props = defineProps({
     show: { type: Boolean, required: true },
@@ -167,6 +181,7 @@ const emit = defineEmits({
     // edit emits the HistoryItem and its optional blob URL
     edit: (item: any, blobUrl: string | null) => true,
     enhance: (item: any, blobUrl: string | null) => true,
+    openInCanva: (item: any) => true,
 });
 
 const copied = ref(false);
@@ -184,6 +199,10 @@ function edit() {
 
 function enhance() {
     emit("enhance", props.item, props.blobUrl);
+}
+
+function openInCanva() {
+    emit("openInCanva", props.item);
 }
 
 async function copyPrompt() {

@@ -35,6 +35,21 @@
             </div>
 
             <div class="space-y-2">
+                <label class="text-sm font-semibold ml-1">Replicate API Token</label>
+                <div class="flex gap-2">
+                    <input
+                        v-model="replicateApiToken"
+                        type="password"
+                        placeholder="Enter your Replicate API Token"
+                        class="flex-1 bg-muted/50 border rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"
+                    />
+                </div>
+                <p class="text-xs text-muted-foreground ml-1">
+                    Required for AI features (Remove Background, Generate Image)
+                </p>
+            </div>
+
+            <div class="space-y-2">
                 <label class="text-sm font-semibold ml-1">{{
                     $t("settings.theme")
                 }}</label>
@@ -117,12 +132,26 @@
                     >
                         {{ $t("settings.fixMediaOrder") }}
                     </button>
+
+                    <button
+                        @click="migrateSources"
+                        class="px-4 py-2 bg-muted hover:bg-muted/80 rounded-xl text-sm font-bold transition-all"
+                        title="Agrega el campo 'source' a items antiguos para mostrar iconos correctamente"
+                    >
+                        {{ $t("settings.migrateSources") }}
+                    </button>
                 </div>
                 <p
                     v-if="migrateResult"
                     class="text-xs text-muted-foreground ml-1"
                 >
                     {{ migrateResult }}
+                </p>
+                <p
+                    v-if="migrateSourcesResult"
+                    class="text-xs text-muted-foreground ml-1"
+                >
+                    {{ migrateSourcesResult }}
                 </p>
             </div>
 
@@ -236,9 +265,10 @@ import {
 const { t } = useI18n();
 const configStore = useConfigStore();
 const historyStore = useHistoryStore();
-const { apiKey, locale, theme, logs } = storeToRefs(configStore);
+const { apiKey, replicateApiToken, locale, theme, logs } = storeToRefs(configStore);
 const importResult = ref<{ imported: number; skipped: number } | null>(null);
 const migrateResult = ref<string | null>(null);
+const migrateSourcesResult = ref<string | null>(null);
 
 function formatDate(date: Date) {
     return new Date(date).toLocaleTimeString();
@@ -263,6 +293,17 @@ async function migrateTimestamps() {
         migrateResult.value = t("settings.migrateNoItems");
     }
     setTimeout(() => (migrateResult.value = null), 5000);
+}
+
+async function migrateSources() {
+    const migrated = await historyStore.migrateSources();
+    if (migrated > 0) {
+        migrateSourcesResult.value = t("settings.migrateSourcesSuccess", { count: migrated });
+        toast.success(migrateSourcesResult.value);
+    } else {
+        migrateSourcesResult.value = t("settings.migrateSourcesNoItems");
+    }
+    setTimeout(() => (migrateSourcesResult.value = null), 5000);
 }
 
 async function exportProject() {

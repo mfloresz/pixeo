@@ -75,7 +75,7 @@
         <main
             :class="[
                 'flex-1 min-h-0 overflow-hidden',
-                activeTab === 'inpaint' ? 'w-full' : 'container mx-auto px-4 py-8 md:px-8 pb-32 overflow-y-auto'
+                activeTab === 'inpaint' || activeTab === 'canva' ? 'w-full' : 'container mx-auto px-4 py-8 md:px-8 pb-32 overflow-y-auto'
             ]"
         >
             <Transition name="fade" mode="out-in">
@@ -177,6 +177,10 @@
                     </div>
                 </div>
 
+                <div v-else-if="activeTab === 'canva'" key="canva" class="h-full">
+                    <CanvaView />
+                </div>
+
                 <div v-else-if="activeTab === 'settings'" key="settings">
                     <SettingsView />
                 </div>
@@ -192,6 +196,7 @@
                 "
                 @edit="handleEdit"
                 @enhance="handleEnhance"
+                @openInCanva="handleOpenInCanva"
             />
         </main>
     </div>
@@ -207,11 +212,12 @@ import { i18n } from "./i18n";
 const { t } = i18n.global;
 import { storeToRefs } from "pinia";
 import { nextTick } from "vue";
-import { Image, Settings, Library, Trash2, Download, Wand2 } from "lucide-vue-next";
+import { Image, Settings, Library, Trash2, Download, Wand2, Palette } from "lucide-vue-next";
 import Toaster from "./components/ui/Toaster.vue";
 import { useConfigStore } from "./stores/config";
 import { useHistoryStore } from "./stores/history";
 import { useModelsStore } from "./stores/models";
+import { useCanvaStore } from "./stores/canva";
 import type { HistoryItem } from "./types";
 import PromptInput from "./components/generate/PromptInput.vue";
 import SettingsView from "./components/settings/SettingsView.vue";
@@ -219,6 +225,7 @@ import LibraryItem from "./components/library/LibraryItem.vue";
 import ZoomModal from "./components/zoom/ZoomModal.vue";
 import GenerationHistory from "./components/generate/GenerationHistory.vue";
 import InpaintView from "./components/inpaint/InpaintView.vue";
+import CanvaView from "./components/canva/CanvaView.vue";
 import { useInpaintStore } from "./stores/inpaint";
 import {
     Tooltip,
@@ -241,6 +248,7 @@ import {
 const configStore = useConfigStore();
 const historyStore = useHistoryStore();
 const modelsStore = useModelsStore();
+const canvaStore = useCanvaStore();
 const { apiKey, quota } = storeToRefs(configStore);
 const { used } = storeToRefs(configStore);
 
@@ -325,6 +333,7 @@ const tabs = [
     { id: "generate", icon: Image },
     { id: "inpaint", icon: Wand2 },
     { id: "library", icon: Library },
+    { id: "canva", icon: Palette },
     { id: "settings", icon: Settings },
 ];
 
@@ -416,6 +425,27 @@ async function handleEnhance(item: HistoryItem, blobUrl: string | null) {
 
     // Close zoom modal
     closeZoom();
+}
+
+async function handleOpenInCanva(item: HistoryItem) {
+    if (!item.projectData?.json) {
+        toast.error("No project data available");
+        return;
+    }
+
+    // Store project data in canva store for loading
+    const dimensions = item.projectData.width && item.projectData.height
+        ? { width: item.projectData.width, height: item.projectData.height }
+        : undefined;
+    canvaStore.setPendingProject(item.projectData.json, dimensions);
+
+    // Switch to canva tab
+    activeTab.value = 'canva';
+
+    // Close zoom modal
+    closeZoom();
+
+    toast.success(t("library.projectOpenedInCanva") || "Project opened in Canva editor");
 }
 </script>
 

@@ -665,6 +665,13 @@ async function generate() {
         if (mode.value === "text2speech") type = "audio";
 
         const id = crypto.randomUUID();
+        
+        // Determine source based on mode
+        let source: 'generate' | 'edit' = 'generate';
+        if (mode.value === 'image-edit') {
+            source = 'edit';
+        }
+        
         await historyStore.addItem(
             {
                 id,
@@ -673,6 +680,7 @@ async function generate() {
                 model: model.name,
                 params: { ...payload },
                 blobKey: id,
+                source,
             },
             blob,
         );

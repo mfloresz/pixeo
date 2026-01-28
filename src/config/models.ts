@@ -5,11 +5,13 @@ export const VIDEO_MODELS = ORIG_VID as Record<string, any>;
 export const EDIT_MODELS = ORIG_EDIT as Record<string, any>;
 export const TTS_MODELS = ORIG_TTS as Record<string, any>;
 
-export type ModelMode = 'text2image' | 'image2video' | 'text2video' | 'image-edit' | 'text2speech';
+export type ModelMode = 'text2image' | 'image2video' | 'text2video' | 'image-edit' | 'text2speech' | 'inpaint' | 'canva';
 
 export const MODES: { id: ModelMode; label: string; icon: string }[] = [
   { id: 'text2image', label: 'Image', icon: 'Image' },
   { id: 'image-edit', label: 'Edit', icon: 'Edit' },
   { id: 'text2video', label: 'Video', icon: 'Video' },
   { id: 'text2speech', label: 'Audio', icon: 'Mic' },
+  { id: 'inpaint', label: 'Inpaint', icon: 'Wand2' },
+  { id: 'canva', label: 'Canva', icon: 'Palette' },
 ];

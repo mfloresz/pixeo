@@ -113,7 +113,9 @@ export const useHistoryStore = defineStore("history", () => {
     await db!.put(STORE_NAME, fullItem);
     await db!.put(BLOB_STORE, blob, fullItem.id);
 
-    const thumb = await generateThumbnail(blob, item.type);
+    // For 'canva' type, we use the image blob directly as thumbnail
+    const thumbType = item.type === 'canva' ? 'image' : item.type;
+    const thumb = await generateThumbnail(blob, thumbType);
     if (thumb) {
       await db!.put(THUMB_STORE, thumb, fullItem.id);
     }
@@ -210,6 +212,44 @@ export const useHistoryStore = defineStore("history", () => {
         }
       }
     }
+  }
+
+  /**
+   * Migrate existing items to add the 'source' field.
+   * This is used for retrocompatibility with items created before the source field was added.
+   * Returns the number of items migrated.
+   */
+  async function migrateSources(): Promise<number> {
+    if (!db) await initDB();
+    let migrated = 0;
+
+    for (const item of items.value) {
+      // Only migrate items without a source field
+      if (!item.source) {
+        // Infer source from mode
+        let source: HistoryItem['source'] = 'generate';
+        
+        if (item.mode === 'image-edit') {
+          source = 'edit';
+        } else if (item.mode === 'canva') {
+          source = 'canva';
+        } else if (item.mode === 'inpaint') {
+          source = 'inpaint';
+        } else if (item.mode === 'text2video' || item.mode === 'image2video') {
+          source = 'generate'; // Videos are still 'generate'
+        } else if (item.mode === 'text2speech') {
+          source = 'generate'; // Audio is still 'generate'
+        }
+
+        const updated = { ...item, source };
+        await db!.put(STORE_NAME, updated);
+        migrated++;
+      }
+    }
+
+    // Reload items after migration
+    await loadItems();
+    return migrated;
   }
 
   async function exportProject(): Promise<void> {
@@ -349,6 +389,7 @@ export const useHistoryStore = defineStore("history", () => {
     clearAll,
     clearOrphanedThumbnails,
     regenerateThumbnails,
+    migrateSources,
     exportProject,
     importProject,
     exportAllAsZip,

@@ -4,3 +4,13 @@ declare module '*.vue' {
     const component: DefineComponent<{}, {}, any>
     export default component
 }
+
+declare module 'fabric' {
+    export = fabric;
+    export as namespace fabric;
+}
+
+declare module 'fabric/*' {
+    export = fabric;
+    export as namespace fabric;
+}

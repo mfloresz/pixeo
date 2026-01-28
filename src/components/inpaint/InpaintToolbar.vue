@@ -80,6 +80,16 @@
                 <Download class="w-4 h-4" />
                 <span class="text-sm hidden sm:inline">{{ $t('inpaint.download') }}</span>
             </button>
+
+            <button
+                v-if="hasRenders"
+                @click="saveToLibrary"
+                class="px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors flex items-center gap-2"
+                :title="$t('inpaint.saveToLibrary')"
+            >
+                <Library class="w-4 h-4" />
+                <span class="text-sm hidden sm:inline">{{ $t('inpaint.saveToLibrary') }}</span>
+            </button>
         </div>
     </div>
 </template>
@@ -87,7 +97,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useInpaintStore } from '../../stores/inpaint';
-import { Undo2, Eye, Download, Maximize, Trash2 } from 'lucide-vue-next';
+import { Undo2, Eye, Download, Maximize, Trash2, Library } from 'lucide-vue-next';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -101,7 +111,11 @@ import {
 } from '@/components/ui/alert-dialog'
 
 const inpaintStore = useInpaintStore();
-const { canUndo, showOriginal, brushSize } = storeToRefs(inpaintStore);
+const { canUndo, showOriginal, brushSize, hasRenders } = storeToRefs(inpaintStore);
+
+async function saveToLibrary() {
+    await inpaintStore.saveToLibrary();
+}
 
 function undo() {
     inpaintStore.undo();

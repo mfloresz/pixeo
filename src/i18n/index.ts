@@ -6,6 +6,7 @@ const messages = {
     common: {
       generate: "Generate",
       library: "Library",
+      canva: "Canva",
       settings: "Settings",
       image: "Image",
       video: "Video",
@@ -71,10 +72,13 @@ const messages = {
       clearConfirmTitle: "Are you sure?",
       clearConfirmDescription: "This action will clear all current work and cannot be undone.",
       cancel: "Cancel",
+      saveToLibrary: "Save to Library",
     },
     library: {
       empty: "No items found in your library.",
       deletedAll: "All items deleted",
+      canvaProject: "Canva Project",
+      projectOpenedInCanva: "Project opened in Canva editor",
     },
     settings: {
       title: "Application Settings",
@@ -98,6 +102,9 @@ const messages = {
       regenerateDone: "Thumbnails regenerated.",
       clearCacheConfirm: "Are you sure you want to clean up orphaned thumbnail cache? This action cannot be undone.",
       clearCacheDone: "Thumbnail cache cleaned.",
+      migrateSources: "Migrate Source Labels",
+      migrateSourcesSuccess: "Migrated {count} items. Source labels will now display correctly.",
+      migrateSourcesNoItems: "No items found to migrate.",
     },
     actions: {
       zoom: "Zoom",
@@ -111,6 +118,7 @@ const messages = {
         "Are you sure you want to delete all items? This action cannot be undone.",
       exportAllSuccess: "Exported {count} items successfully",
       enhance: "Enhance",
+      openInCanva: "Open in Editor",
     },
     logs: {
       promptOptimized: "[{model}] Prompt optimized",
@@ -128,6 +136,7 @@ const messages = {
     common: {
       generate: "Generar",
       library: "Biblioteca",
+      canva: "Canva",
       settings: "Configuración",
       image: "Imagen",
       video: "Video",
@@ -193,10 +202,13 @@ const messages = {
       clearConfirmTitle: "¿Estás seguro?",
       clearConfirmDescription: "Esta acción limpiará todo el trabajo actual y no se puede deshacer.",
       cancel: "Cancelar",
+      saveToLibrary: "Guardar en Biblioteca",
     },
     library: {
       empty: "No se encontraron elementos en tu biblioteca.",
       deletedAll: "Todos los elementos han sido eliminados",
+      canvaProject: "Proyecto Canva",
+      projectOpenedInCanva: "Proyecto abierto en el editor de Canva",
     },
     settings: {
       title: "Configuración de la Aplicación",
@@ -220,6 +232,9 @@ const messages = {
       regenerateDone: "Miniaturas regeneradas.",
       clearCacheConfirm: "¿Estás seguro de que quieres limpiar la cache de miniaturas huérfanas? Esta acción no se puede deshacer.",
       clearCacheDone: "Cache de miniaturas limpiada.",
+      migrateSources: "Migrar Etiquetas de Origen",
+      migrateSourcesSuccess: "Se migraron {count} elementos. Las etiquetas de origen ahora se mostrarán correctamente.",
+      migrateSourcesNoItems: "No se encontraron elementos para migrar.",
     },
     actions: {
       zoom: "Zoom",
@@ -233,6 +248,7 @@ const messages = {
         "¿Estás seguro de que quieres eliminar todos los elementos? Esta acción no se puede deshacer.",
       exportAllSuccess: "Exportados {count} elementos exitosamente",
       enhance: "Mejorar",
+      openInCanva: "Abrir en Editor",
     },
     logs: {
       promptOptimized: "[{model}] Prompt optimizado",

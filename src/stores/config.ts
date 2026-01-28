@@ -6,6 +6,7 @@ import { ChutesService } from '../services/chutes';
 
 export const useConfigStore = defineStore('config', () => {
     const apiKey = ref(localStorage.getItem('pixeo_api_key') || '');
+    const replicateApiToken = ref(localStorage.getItem('pixeo_replicate_token') || '');
     const locale = ref(localStorage.getItem('pixeo_locale') || 'en');
     const theme = ref(localStorage.getItem('pixeo_theme') || 'system');
     const quota = ref(0);
@@ -59,6 +60,10 @@ export const useConfigStore = defineStore('config', () => {
         refreshQuota();
     });
 
+    watch(replicateApiToken, (val) => {
+        localStorage.setItem('pixeo_replicate_token', val);
+    });
+
     watch(locale, (val) => {
         localStorage.setItem('pixeo_locale', val);
         (i18n.global as any).locale.value = val;
@@ -74,5 +79,5 @@ export const useConfigStore = defineStore('config', () => {
         if (logs.value.length > 100) logs.value.pop();
     };
 
-    return { apiKey, locale, theme, quota, used, logs, refreshQuota, addLog };
+    return { apiKey, replicateApiToken, locale, theme, quota, used, logs, refreshQuota, addLog };
 });

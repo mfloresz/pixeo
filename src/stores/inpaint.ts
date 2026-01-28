@@ -145,6 +145,41 @@ export const useInpaintStore = defineStore('inpaint', () => {
         }
     }
 
+    async function saveToLibrary(): Promise<void> {
+        const img = currentImage.value;
+        if (!img) {
+            setError('No image to save');
+            return;
+        }
+
+        try {
+            // Import history store dynamically
+            const { useHistoryStore } = await import('./history');
+            const historyStore = useHistoryStore();
+
+            // Convert image to blob
+            const response = await fetch(img.src);
+            const blob = await response.blob();
+
+            // Create a new history item
+            const id = crypto.randomUUID();
+            await historyStore.addItem({
+                id,
+                type: 'image',
+                mode: 'inpaint',
+                model: 'Inpaint / Enhance',
+                params: { originalFileName: imageFile.value?.name },
+                blobKey: id,
+                source: 'enhance'
+            }, blob);
+
+            setError(null);
+        } catch (err: any) {
+            console.error('Error saving to library:', err);
+            setError(err.message || 'Failed to save to library');
+        }
+    }
+
     return {
         imageFile,
         originalImage,
@@ -177,5 +212,6 @@ export const useInpaintStore = defineStore('inpaint', () => {
         setModelLoading,
         setError,
         superResolution,
+        saveToLibrary,
     };
 });
