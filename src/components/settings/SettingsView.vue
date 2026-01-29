@@ -59,9 +59,45 @@
             </div>
 
             <div class="space-y-2">
-                <label class="text-sm font-semibold ml-1">{{
-                    $t("settings.storage")
-                }}</label>
+                <label class="text-sm font-semibold ml-1"
+                    >Importar / Exportar</label
+                >
+                <div class="flex gap-2">
+                    <button
+                        @click="exportProject"
+                        class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+                    >
+                        <Download class="w-4 h-4" /> {{ $t("settings.export") }}
+                    </button>
+                    <label
+                        class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer"
+                    >
+                        <Upload class="w-4 h-4" /> {{ $t("settings.import") }}
+                        <input
+                            type="file"
+                            accept=".json"
+                            class="hidden"
+                            @change="importProject"
+                        />
+                    </label>
+                </div>
+                <p
+                    v-if="importResult"
+                    class="text-xs text-muted-foreground ml-1"
+                >
+                    {{
+                        $t("settings.importSuccess", {
+                            imported: importResult.imported,
+                            skipped: importResult.skipped,
+                        })
+                    }}
+                </p>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-semibold ml-1"
+                    >{{ $t("settings.storage") }}</label
+                >
                 <div class="flex gap-2 flex-wrap">
                     <AlertDialog>
                         <AlertDialogTrigger as-child>
@@ -117,48 +153,36 @@
                     >
                         {{ $t("settings.fixMediaOrder") }}
                     </button>
+
+                    <AlertDialog>
+                        <AlertDialogTrigger as-child>
+                            <button
+                                class="px-4 py-2 bg-muted hover:bg-muted/80 rounded-xl text-sm font-bold transition-all"
+                            >
+                                {{ $t("settings.inferModes") }}
+                            </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Inferir modos?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    {{ $t("settings.inferModesConfirm") }}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction @click="migrateModes">
+                                    Continuar
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
                 <p
                     v-if="migrateResult"
                     class="text-xs text-muted-foreground ml-1"
                 >
                     {{ migrateResult }}
-                </p>
-            </div>
-
-            <div class="space-y-2">
-                <label class="text-sm font-semibold ml-1"
-                    >Importar / Exportar</label
-                >
-                <div class="flex gap-2">
-                    <button
-                        @click="exportProject"
-                        class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm font-bold transition-all flex items-center gap-2"
-                    >
-                        <Download class="w-4 h-4" /> {{ $t("settings.export") }}
-                    </button>
-                    <label
-                        class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer"
-                    >
-                        <Upload class="w-4 h-4" /> {{ $t("settings.import") }}
-                        <input
-                            type="file"
-                            accept=".json"
-                            class="hidden"
-                            @change="importProject"
-                        />
-                    </label>
-                </div>
-                <p
-                    v-if="importResult"
-                    class="text-xs text-muted-foreground ml-1"
-                >
-                    {{
-                        $t("settings.importSuccess", {
-                            imported: importResult.imported,
-                            skipped: importResult.skipped,
-                        })
-                    }}
                 </p>
             </div>
 
@@ -265,6 +289,17 @@ async function migrateTimestamps() {
     setTimeout(() => (migrateResult.value = null), 5000);
 }
 
+async function migrateModes() {
+    const migrated = await historyStore.migrateModes();
+    if (migrated > 0) {
+        migrateResult.value = t("settings.modesInferred", { count: migrated });
+        toast.success(migrateResult.value);
+    } else {
+        migrateResult.value = t("settings.modesInferNoItems");
+    }
+    setTimeout(() => (migrateResult.value = null), 5000);
+}
+
 async function exportProject() {
     await historyStore.exportProject();
 }
@@ -276,9 +311,9 @@ async function importProject(event: Event) {
     try {
         const result = await historyStore.importProject(input.files[0]);
         importResult.value = result;
-        toast.success(t("settings.importSuccess", { 
-            imported: result.imported, 
-            skipped: result.skipped 
+        toast.success(t("settings.importSuccess", {
+            imported: result.imported,
+            skipped: result.skipped
         }));
         setTimeout(() => (importResult.value = null), 5000);
     } catch (error) {
