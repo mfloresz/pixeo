@@ -523,7 +523,7 @@ async function translatePrompt() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    model: "openai/gpt-oss-120b-TEE",
+                    model: "chutesai/Mistral-Small-3.2-24B-Instruct-2506",
                     messages: [
                         {
                             role: "system",
@@ -536,7 +536,6 @@ async function translatePrompt() {
                         },
                     ],
                     stream: false,
-                    max_tokens: 128000,
                     temperature: 0.3,
                 }),
             },
@@ -637,9 +636,7 @@ async function generate() {
             }
             if (
                 typeof value === "string" &&
-                (key.includes("b64") ||
-                    key === "image" ||
-                    key === "img_b64")
+                (key.includes("b64") || key === "image" || key === "img_b64")
             ) {
                 return value.length > 50
                     ? `${value.substring(0, 50)}... [truncated]`
