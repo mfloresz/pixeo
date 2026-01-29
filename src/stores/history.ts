@@ -106,6 +106,44 @@ export const useHistoryStore = defineStore("history", () => {
     return migrated;
   }
 
+  async function migrateModes(): Promise<number> {
+    if (!db) await initDB();
+    const allItems = await db!.getAll(STORE_NAME);
+    let migrated = 0;
+
+    for (const item of allItems) {
+      // Skip items that already have a mode
+      if (item.mode) continue;
+
+      // Infer mode from type
+      let inferredMode = 'text2image';
+      if (item.type === 'video') {
+        inferredMode = 'text2video';
+      } else if (item.type === 'audio') {
+        inferredMode = 'text2speech';
+      }
+
+      // If item has image_b64s or similar fields in params, it might be image-edit
+      if (item.params && (item.params.image_b64s || item.params.image || item.params.img_b64)) {
+        inferredMode = 'image-edit';
+      }
+
+      // If it's an inpaint-type image, it's inpaint
+      const inpaintKeywords = ['inpaint', 'edit', 'enhance'];
+      const promptLower = (item.params?.prompt || '').toLowerCase();
+      if (inpaintKeywords.some(keyword => promptLower.includes(keyword))) {
+        inferredMode = 'inpaint';
+      }
+
+      const updated = { ...item, mode: inferredMode };
+      await db!.put(STORE_NAME, updated);
+      migrated++;
+    }
+
+    await loadItems();
+    return migrated;
+  }
+
   async function addItem(item: Omit<HistoryItem, "timestamp">, blob: Blob) {
     if (!db) await initDB();
     const fullItem: HistoryItem = { ...item, timestamp: new Date() };
@@ -355,5 +393,6 @@ export const useHistoryStore = defineStore("history", () => {
     initDB,
     clearSession,
     migrateTimestamps,
+    migrateModes,
   };
 });

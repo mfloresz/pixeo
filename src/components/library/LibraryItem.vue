@@ -46,6 +46,18 @@
           </TooltipContent>
         </Tooltip>
       </div>
+
+      <!-- Mode Icon Badge -->
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <div class="absolute bottom-2 right-2 w-8 h-8 bg-black/50 backdrop-blur-sm rounded-md flex items-center justify-center cursor-help">
+            <component :is="ModeIconComponent" class="w-6 h-6 text-white" />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{{ modeTooltipLabel }}</p>
+        </TooltipContent>
+      </Tooltip>
     </div>
     
     <div class="p-3 space-y-1">
@@ -60,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { Download, Trash2, Mic, Maximize2 } from 'lucide-vue-next';
 import { useHistoryStore } from '../../stores/history';
 import type { HistoryItem } from '../../types';
@@ -71,6 +83,7 @@ import {
     TooltipTrigger,
     TooltipProvider,
 } from '../ui/tooltip';
+import { getModeIcon, getModeDefaultLabel } from '../../lib/modeIcons';
 
 const props = defineProps<{ item: HistoryItem }>();
 const emit = defineEmits<{
@@ -83,6 +96,9 @@ const itemRef = ref<HTMLElement | null>(null);
 const isVisible = ref(false);
 const thumbLoaded = ref(false);
 const fullBlobLoaded = ref(false);
+
+const ModeIconComponent = computed(() => getModeIcon(props.item.mode));
+const modeTooltipLabel = computed(() => getModeDefaultLabel(props.item.mode));
 
 function formatDate(date: any) {
   return new Date(date).toLocaleDateString();
