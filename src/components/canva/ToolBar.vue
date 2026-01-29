@@ -341,6 +341,92 @@
                     </PopoverContent>
                 </Popover>
             </template>
+
+            <!-- Shape Tools (only when shape object is selected) -->
+            <template v-if="isShapeObject && selectedObject">
+                <!-- Fill Color -->
+                <Tooltip>
+                    <TooltipTrigger as-child>
+                        <div class="flex items-center gap-1">
+                            <ColorPicker
+                                :model-value="fillColor"
+                                @update:model-value="updateFillColor"
+                                :show-hex-value="false"
+                                trigger-class="w-6 h-6"
+                            />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Fill Color</p>
+                    </TooltipContent>
+                </Tooltip>
+
+                <Separator orientation="vertical" class="h-6" />
+
+                <!-- Stroke Color -->
+                <Tooltip>
+                    <TooltipTrigger as-child>
+                        <div class="flex items-center gap-1">
+                            <ColorPicker
+                                :model-value="strokeColor"
+                                @update:model-value="updateStrokeColor"
+                                :show-hex-value="false"
+                                trigger-class="w-6 h-6"
+                            />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Border Color</p>
+                    </TooltipContent>
+                </Tooltip>
+
+                <Separator orientation="vertical" class="h-6" />
+
+                <!-- Stroke Width -->
+                <div class="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" class="h-8 w-8" @click="decreaseStrokeWidth">
+                        <Minus class="w-3 h-3" />
+                    </Button>
+                    <span class="text-sm font-medium w-10 text-center">{{ strokeWidth }}px</span>
+                    <Button variant="ghost" size="icon" class="h-8 w-8" @click="increaseStrokeWidth">
+                        <Plus class="w-3 h-3" />
+                    </Button>
+                </div>
+
+                <Separator orientation="vertical" class="h-6" />
+
+                <!-- Opacity -->
+                <Tooltip>
+                    <TooltipTrigger as-child>
+                        <Popover>
+                            <PopoverTrigger as-child>
+                                <Button variant="ghost" size="icon" class="h-8 w-8">
+                                    <span class="text-xs font-medium">{{ Math.round(currentOpacity * 100) }}%</span>
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent align="center" class="w-48 p-3">
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <Label class="text-xs text-muted-foreground">Opacity</Label>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.05"
+                                        :value="currentOpacity"
+                                        @input="(e) => changeOpacity(parseFloat((e.target as HTMLInputElement).value))"
+                                        class="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer"
+                                    />
+                                </div>
+                            </PopoverContent>
+                        </Popover>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Opacity</p>
+                    </TooltipContent>
+                </Tooltip>
+            </template>
         </div>
 
         <!-- Right side - Zoom, Export & Import -->
@@ -573,6 +659,14 @@ const isTextObject = computed(() => {
     return selectedObject.value instanceof fabric.IText;
 });
 
+const isShapeObject = computed(() => {
+    if (!selectedObject.value) return false;
+    return selectedObject.value instanceof fabric.Rect ||
+           selectedObject.value instanceof fabric.Circle ||
+           selectedObject.value instanceof fabric.Triangle ||
+           selectedObject.value instanceof fabric.Polygon;
+});
+
 const currentFontFamily = computed(() => {
     if (!isTextObject.value || !selectedObject.value) return 'Arial';
     return (selectedObject.value as fabric.IText).fontFamily || 'Arial';
@@ -596,6 +690,16 @@ const currentOpacity = computed(() => {
 const fillColor = computed(() => {
     if (!selectedObject.value) return '#000000';
     return (selectedObject.value as any)?.fill?.toString() || '#000000';
+});
+
+const strokeColor = computed(() => {
+    if (!selectedObject.value) return '#000000';
+    return (selectedObject.value as any)?.stroke?.toString() || '#000000';
+});
+
+const strokeWidth = computed(() => {
+    if (!selectedObject.value) return 0;
+    return (selectedObject.value as any)?.strokeWidth || 0;
 });
 
 const isBold = computed(() => {
@@ -817,6 +921,20 @@ function toggleStrikethrough() {
 
 function updateFillColor(color: string) {
     editor.changeFillColor(color);
+}
+
+function updateStrokeColor(color: string) {
+    editor.changeStrokeColor(color);
+}
+
+function increaseStrokeWidth() {
+    const newWidth = Math.min(strokeWidth.value + 1, 20);
+    editor.changeStrokeWidth(newWidth);
+}
+
+function decreaseStrokeWidth() {
+    const newWidth = Math.max(strokeWidth.value - 1, 0);
+    editor.changeStrokeWidth(newWidth);
 }
 
 function changeOpacity(opacity: number) {

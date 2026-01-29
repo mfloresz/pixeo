@@ -1,9 +1,10 @@
 import { onMounted, onUnmounted } from 'vue';
 import type { Ref } from 'vue';
-import { fabric } from '../../lib/fabric';
+import { ActiveSelection } from '../../lib/fabric';
+import type { CanvasInstance, FabricObjectInstance } from '../../lib/fabric';
 
 export interface UseHotkeysOptions {
-    canvas: Ref<fabric.Canvas | null>;
+    canvas: Ref<CanvasInstance | null>;
     undo: () => void;
     redo: () => void;
     save?: () => void;
@@ -26,7 +27,7 @@ export function useHotkeys(options: UseHotkeysOptions) {
             const canvas = options.canvas.value;
             if (canvas) {
                 const activeObjects = canvas.getActiveObjects();
-                activeObjects.forEach((obj) => canvas.remove(obj));
+                activeObjects.forEach((obj: FabricObjectInstance) => canvas.remove(obj));
                 canvas.discardActiveObject();
                 canvas.renderAll();
             }
@@ -51,9 +52,9 @@ export function useHotkeys(options: UseHotkeysOptions) {
             const canvas = options.canvas.value;
             if (canvas) {
                 canvas.discardActiveObject();
-                const allObjects = canvas.getObjects().filter((obj) => obj.selectable);
+                const allObjects = canvas.getObjects().filter((obj: FabricObjectInstance) => obj.selectable);
                 if (allObjects.length > 0) {
-                    const selection = new fabric.ActiveSelection(allObjects, { canvas });
+                    const selection = new ActiveSelection(allObjects, { canvas });
                     canvas.setActiveObject(selection);
                     canvas.renderAll();
                 }

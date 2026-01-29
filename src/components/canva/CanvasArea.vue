@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useCanvas } from '../../composables/canva/useCanvas';
-import type { fabric } from '../../lib/fabric';
+import type { CanvasInstance, FabricObjectInstance } from '../../lib/fabric';
 
 interface Props {
     width?: number;
@@ -26,9 +26,9 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-    (e: 'canvasReady', canvas: fabric.Canvas): void;
-    (e: 'objectSelected', object: fabric.Object | null): void;
-    (e: 'objectModified', object: fabric.Object): void;
+    (e: 'canvasReady', canvas: CanvasInstance): void;
+    (e: 'objectSelected', object: FabricObjectInstance | null): void;
+    (e: 'objectModified', object: FabricObjectInstance): void;
 }>();
 
 const containerRef = ref<HTMLDivElement | null>(null);
@@ -69,11 +69,11 @@ watch(() => props.backgroundColor, (newColor) => {
 });
 
 // Métodos expuestos
-function getCanvas(): fabric.Canvas | null {
+function getCanvas(): CanvasInstance | null {
     return canvas.value;
 }
 
-function addObject(object: fabric.Object) {
+function addObject(object: FabricObjectInstance) {
     if (canvas.value) {
         canvas.value.add(object);
         canvas.value.setActiveObject(object);
@@ -81,7 +81,7 @@ function addObject(object: fabric.Object) {
     }
 }
 
-function removeObject(object: fabric.Object) {
+function removeObject(object: FabricObjectInstance) {
     if (canvas.value) {
         canvas.value.remove(object);
         canvas.value.discardActiveObject();

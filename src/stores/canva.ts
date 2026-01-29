@@ -1,16 +1,13 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { ActiveTool, CanvaProject } from '../types/canva';
-import type { FabricNamespace } from '../lib/fabric';
-
-// Usar el namespace de fabric para tipos
-type fabric = FabricNamespace;
+import type { CanvasInstance, FabricObjectInstance } from '../lib/fabric';
 
 export const useCanvaStore = defineStore('canva', () => {
     // Estado del editor
-    const canvas = ref<fabric.Canvas | null>(null);
+    const canvas = ref<CanvasInstance | null>(null);
     const activeTool = ref<ActiveTool>('select');
-    const selectedObject = ref<fabric.Object | null>(null);
+    const selectedObject = ref<FabricObjectInstance | null>(null);
     const sidebarVisible = ref(true);
 
     // Propiedades de estilo
@@ -37,7 +34,7 @@ export const useCanvaStore = defineStore('canva', () => {
     const canRedo = computed(() => currentHistoryIndex.value < history.value.length - 1);
 
     // Actions
-    function setCanvas(newCanvas: fabric.Canvas | null) {
+    function setCanvas(newCanvas: CanvasInstance | null) {
         canvas.value = newCanvas;
     }
 
@@ -49,7 +46,7 @@ export const useCanvaStore = defineStore('canva', () => {
         sidebarVisible.value = visible;
     }
 
-    function setSelectedObject(object: fabric.Object | null) {
+    function setSelectedObject(object: FabricObjectInstance | null) {
         selectedObject.value = object;
     }
 

@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [vue(), tailwindcss()],
   base: process.env.GITHUB_PAGES ? '/pixeo/' : '/',
   ssr: {
-    noExternal: ['vue-sonnier']
+    noExternal: ['vue-sonner']
   },
   resolve: {
     alias: {
@@ -17,5 +17,16 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['fabric'],
+    esbuildOptions: {
+      // Necesario para que fabric se optimice correctamente
+      mainFields: ['module', 'main'],
+    },
+  },
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
+      // Asegurar que fabric se incluya correctamente
+      include: [/node_modules/],
+    },
   },
 })

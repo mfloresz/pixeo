@@ -16,6 +16,10 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Interop - Necesario para fabric v6 */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

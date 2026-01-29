@@ -1,7 +1,14 @@
 import { ref, computed } from 'vue';
-import { fabric } from '../../lib/fabric';
+import {
+    Rect, Circle, Triangle, Polygon, IText, FabricImage,
+    Shadow, filters, Image, FabricText
+} from '../../lib/fabric';
 import { useCanvaStore } from '../../stores/canva';
 import type { ShapeType, ImageFilter, CanvaProject, Template } from '../../types/canva';
+import type {
+    FabricObjectInstance, ImageInstance, ICircleOptions, ITriangleOptions,
+    IRectOptions, IPolylineOptions, ITextOptions, IImageOptions, IBaseFilter
+} from '../../lib/fabric';
 
 // JSON_KEYS completas para preservar todas las propiedades de los objetos
 // Basado en el proyecto original canva-clone
@@ -29,10 +36,10 @@ export function useEditor() {
 
     // ==================== SHAPES ====================
 
-    function addRectangle(options?: Partial<fabric.IRectOptions>) {
+    function addRectangle(options?: any) {
         if (!canvas.value) return;
 
-        const rect = new fabric.Rect({
+        const rect = new Rect({
             left: 100,
             top: 100,
             width: 100,
@@ -51,10 +58,10 @@ export function useEditor() {
         return rect;
     }
 
-    function addCircle(options?: Partial<fabric.ICircleOptions>) {
+    function addCircle(options?: Partial<ICircleOptions>) {
         if (!canvas.value) return;
 
-        const circle = new fabric.Circle({
+        const circle = new Circle({
             left: 100,
             top: 100,
             radius: 50,
@@ -72,10 +79,10 @@ export function useEditor() {
         return circle;
     }
 
-    function addTriangle(options?: Partial<fabric.ITriangleOptions>) {
+    function addTriangle(options?: Partial<ITriangleOptions>) {
         if (!canvas.value) return;
 
-        const triangle = new fabric.Triangle({
+        const triangle = new Triangle({
             left: 100,
             top: 100,
             width: 100,
@@ -94,10 +101,10 @@ export function useEditor() {
         return triangle;
     }
 
-    function addSoftRectangle(options?: Partial<fabric.IRectOptions>) {
+    function addSoftRectangle(options?: Partial<IRectOptions>) {
         if (!canvas.value) return;
 
-        const rect = new fabric.Rect({
+        const rect = new Rect({
             left: 100,
             top: 100,
             width: 100,
@@ -118,13 +125,13 @@ export function useEditor() {
         return rect;
     }
 
-    function addInverseTriangle(options?: Partial<fabric.IPolylineOptions>) {
+    function addInverseTriangle(options?: Partial<IPolylineOptions>) {
         if (!canvas.value) return;
 
         const width = 100;
         const height = 100;
 
-        const triangle = new fabric.Polygon([
+        const triangle = new Polygon([
             { x: 0, y: 0 },
             { x: width, y: 0 },
             { x: width / 2, y: height }
@@ -145,13 +152,13 @@ export function useEditor() {
         return triangle;
     }
 
-    function addDiamond(options?: Partial<fabric.IPolylineOptions>) {
+    function addDiamond(options?: Partial<IPolylineOptions>) {
         if (!canvas.value) return;
 
         const width = 100;
         const height = 100;
 
-        const diamond = new fabric.Polygon([
+        const diamond = new Polygon([
             { x: width / 2, y: 0 },
             { x: width, y: height / 2 },
             { x: width / 2, y: height },
@@ -192,15 +199,22 @@ export function useEditor() {
 
     // ==================== TEXT ====================
 
-    function addText(text: string = 'Double click to edit', options?: Partial<fabric.ITextOptions>) {
+    function addText(text: string = 'Double click to edit', options?: Partial<ITextOptions>) {
         if (!canvas.value) return;
 
-        const textObj = new fabric.IText(text, {
+        const textObj = new IText(text, {
             left: 100,
             top: 100,
             fontFamily: options?.fontFamily || store.fontFamily,
             fontSize: options?.fontSize || store.fontSize,
             fill: store.fillColor,
+            // Ensure controls are enabled for text
+            hasControls: true,
+            hasBorders: true,
+            selectable: true,
+            evented: true,
+            hasRotatingPoint: true,
+            lockUniScaling: false,
             ...options
         });
 
@@ -212,8 +226,8 @@ export function useEditor() {
         return textObj;
     }
 
-    function updateText(object: fabric.Object, newText: string) {
-        if (object instanceof fabric.IText) {
+    function updateText(object: FabricObjectInstance, newText: string) {
+        if (object instanceof IText) {
             object.set({ text: newText });
             canvas.value?.renderAll();
             store.saveState();
@@ -222,7 +236,7 @@ export function useEditor() {
 
     // ==================== IMAGES ====================
 
-    async function addImageFromURL(url: string, options?: Partial<fabric.IImageOptions>): Promise<fabric.Image | null> {
+    async function addImageFromURL(url: string, options?: Partial<IImageOptions>): Promise<ImageInstance | null> {
         if (!canvas.value) return null;
 
         isLoading.value = true;
@@ -230,7 +244,7 @@ export function useEditor() {
 
         try {
             return new Promise((resolve) => {
-                fabric.Image.fromURL(url, (img) => {
+                Image.fromURL(url, (img: ImageInstance) => {
                     // Escalar imagen si es muy grande
                     const maxWidth = 400;
                     const maxHeight = 400;
@@ -247,6 +261,13 @@ export function useEditor() {
                     img.set({
                         left: 100,
                         top: 100,
+                        // Ensure controls are enabled for images
+                        hasControls: true,
+                        hasBorders: true,
+                        selectable: true,
+                        evented: true,
+                        hasRotatingPoint: true,
+                        lockUniScaling: false,
                         ...options
                     });
 
@@ -267,7 +288,7 @@ export function useEditor() {
         }
     }
 
-    async function addImageFromFile(file: File, options?: Partial<fabric.IImageOptions>): Promise<fabric.Image | null> {
+    async function addImageFromFile(file: File, options?: Partial<IImageOptions>): Promise<ImageInstance | null> {
         return new Promise((resolve) => {
             const reader = new FileReader();
 
@@ -334,7 +355,7 @@ export function useEditor() {
         store.setFontFamily(font);
 
         const activeObject = canvas.value?.getActiveObject();
-        if (activeObject instanceof fabric.IText) {
+        if (activeObject instanceof IText) {
             activeObject.set('fontFamily', font);
             canvas.value?.renderAll();
             store.saveState();
@@ -345,7 +366,7 @@ export function useEditor() {
         store.setFontSize(size);
 
         const activeObject = canvas.value?.getActiveObject();
-        if (activeObject instanceof fabric.IText) {
+        if (activeObject instanceof IText) {
             activeObject.set('fontSize', size);
             canvas.value?.renderAll();
             store.saveState();
@@ -356,7 +377,7 @@ export function useEditor() {
 
     function changeLetterSpacing(spacing: number) {
         const activeObject = canvas.value?.getActiveObject();
-        if (activeObject instanceof fabric.IText) {
+        if (activeObject instanceof IText) {
             // @ts-ignore - charSpacing is available in Fabric.js but not in types
             activeObject.set('charSpacing', spacing * 1000); // Fabric uses 1/1000 of font size
             canvas.value?.renderAll();
@@ -364,9 +385,9 @@ export function useEditor() {
         }
     }
 
-    function changeTextShadow(shadow: fabric.Shadow | undefined) {
+    function changeTextShadow(shadow: InstanceType<typeof Shadow> | undefined) {
         const activeObject = canvas.value?.getActiveObject();
-        if (activeObject instanceof fabric.IText) {
+        if (activeObject instanceof IText) {
             activeObject.set('shadow', shadow);
             canvas.value?.renderAll();
             store.saveState();
@@ -375,7 +396,7 @@ export function useEditor() {
 
     function changeTextOutline(color: string | undefined, width: number = 1) {
         const activeObject = canvas.value?.getActiveObject();
-        if (activeObject instanceof fabric.IText) {
+        if (activeObject instanceof IText) {
             if (color) {
                 activeObject.set('stroke', color);
                 activeObject.set('strokeWidth', width);
@@ -390,7 +411,7 @@ export function useEditor() {
 
     // ==================== LAYER OPERATIONS ====================
 
-    function bringToFront(object?: fabric.Object) {
+    function bringToFront(object?: FabricObjectInstance) {
         const target = object || canvas.value?.getActiveObject();
         if (target && canvas.value) {
             canvas.value.bringToFront(target);
@@ -399,7 +420,7 @@ export function useEditor() {
         }
     }
 
-    function sendToBack(object?: fabric.Object) {
+    function sendToBack(object?: FabricObjectInstance) {
         const target = object || canvas.value?.getActiveObject();
         if (target && canvas.value) {
             canvas.value.sendToBack(target);
@@ -408,7 +429,7 @@ export function useEditor() {
         }
     }
 
-    function deleteObject(object?: fabric.Object) {
+    function deleteObject(object?: FabricObjectInstance) {
         const target = object || canvas.value?.getActiveObject();
         if (target && canvas.value) {
             canvas.value.remove(target);
@@ -439,44 +460,44 @@ export function useEditor() {
 
     // ==================== IMAGE FILTERS ====================
 
-    function createFilter(filterType: ImageFilter): fabric.IBaseFilter | null {
-        const filters = fabric.Image.filters as any;
+    function createFilter(filterType: ImageFilter): IBaseFilter | null {
+        const filterNamespace = filters as any;
 
         switch (filterType) {
             case 'grayscale':
-                return new filters.Grayscale();
+                return new filterNamespace.Grayscale();
             case 'sepia':
-                return new filters.Sepia();
+                return new filterNamespace.Sepia();
             case 'invert':
-                return new filters.Invert();
+                return new filterNamespace.Invert();
             case 'brightness':
-                return new filters.Brightness({ brightness: 0.1 });
+                return new filterNamespace.Brightness({ brightness: 0.1 });
             case 'contrast':
-                return new filters.Contrast({ contrast: 0.1 });
+                return new filterNamespace.Contrast({ contrast: 0.1 });
             case 'saturation':
-                return new filters.Saturation({ saturation: 0.5 });
+                return new filterNamespace.Saturation({ saturation: 0.5 });
             case 'vibrance':
-                return filters.Vibrance && new filters.Vibrance({ vibrance: 0.5 });
+                return filterNamespace.Vibrance && new filterNamespace.Vibrance({ vibrance: 0.5 });
             case 'blur':
-                return new filters.Blur({ blur: 0.5 });
+                return new filterNamespace.Blur({ blur: 0.5 });
             case 'noise':
-                return new filters.Noise({ noise: 100 });
+                return new filterNamespace.Noise({ noise: 100 });
             case 'pixelate':
-                return new filters.Pixelate({ blocksize: 8 });
+                return new filterNamespace.Pixelate({ blocksize: 8 });
             case 'polaroid':
-                return filters.Polaroid && new filters.Polaroid();
+                return filterNamespace.Polaroid && new filterNamespace.Polaroid();
             case 'kodachrome':
-                return filters.Kodachrome && new filters.Kodachrome();
+                return filterNamespace.Kodachrome && new filterNamespace.Kodachrome();
             case 'brownie':
-                return filters.Brownie && new filters.Brownie();
+                return filterNamespace.Brownie && new filterNamespace.Brownie();
             case 'vintage':
-                return filters.Vintage && new filters.Vintage();
+                return filterNamespace.Vintage && new filterNamespace.Vintage();
             case 'technicolor':
-                return filters.Technicolor && new filters.Technicolor();
+                return filterNamespace.Technicolor && new filterNamespace.Technicolor();
             case 'sharpen':
-                return filters.Sharpen && new filters.Sharpen();
+                return filterNamespace.Sharpen && new filterNamespace.Sharpen();
             case 'emboss':
-                return filters.Emboss && new filters.Emboss();
+                return filterNamespace.Emboss && new filterNamespace.Emboss();
             case 'none':
             default:
                 return null;
@@ -488,9 +509,9 @@ export function useEditor() {
 
         const activeObjects = canvas.value.getActiveObjects();
 
-        activeObjects.forEach((object) => {
-            if (object instanceof fabric.Image) {
-                const image = object as fabric.Image;
+        activeObjects.forEach((object: FabricObjectInstance) => {
+            if (object instanceof FabricImage) {
+                const image = object as ImageInstance;
 
                 // Reset filters
                 image.filters = [];
@@ -533,9 +554,9 @@ export function useEditor() {
 
         const activeObjects = canvas.value.getActiveObjects();
 
-        activeObjects.forEach((object) => {
-            if (object instanceof fabric.Image) {
-                const image = object as fabric.Image;
+        activeObjects.forEach((object: FabricObjectInstance) => {
+            if (object instanceof FabricImage) {
+                const image = object as ImageInstance;
                 image.filters = [];
                 image.applyFilters();
             }
@@ -606,14 +627,24 @@ export function useEditor() {
 
         return new Promise((resolve) => {
             canvas.value!.loadFromJSON(json, () => {
-                // Ensure all objects are selectable and have controls
+                // Ensure all objects are selectable and have controls (Canva-style)
                 const objects = canvas.value!.getObjects();
-                objects.forEach((obj) => {
+                objects.forEach((obj: FabricObjectInstance) => {
                     obj.set({
                         selectable: true,
                         evented: true,
                         hasControls: true,
-                        hasBorders: true
+                        hasBorders: true,
+                        hasRotatingPoint: true,
+                        lockUniScaling: false,
+                        cornerStyle: 'circle',
+                        cornerColor: '#ffffff',
+                        cornerStrokeColor: '#3b82f6',
+                        cornerSize: 10,
+                        transparentCorners: false,
+                        borderColor: '#3b82f6',
+                        borderScaleFactor: 2,
+                        rotatingPointOffset: 25
                     });
                 });
 
@@ -638,11 +669,11 @@ export function useEditor() {
 
         // Create objects from template
         for (const obj of template.objects) {
-            let fabricObj: fabric.Object | null = null;
+            let fabricObj: FabricObjectInstance | null = null;
 
             switch (obj.type) {
                 case 'rect':
-                    fabricObj = new fabric.Rect({
+                    fabricObj = new Rect({
                         left: obj.left,
                         top: obj.top,
                         width: obj.width || 100,
@@ -657,7 +688,7 @@ export function useEditor() {
                     });
                     break;
                 case 'circle':
-                    fabricObj = new fabric.Circle({
+                    fabricObj = new Circle({
                         left: obj.left,
                         top: obj.top,
                         radius: obj.radius || 50,
@@ -667,7 +698,7 @@ export function useEditor() {
                     });
                     break;
                 case 'triangle':
-                    fabricObj = new fabric.Triangle({
+                    fabricObj = new Triangle({
                         left: obj.left,
                         top: obj.top,
                         width: obj.width || 100,
@@ -678,7 +709,7 @@ export function useEditor() {
                     });
                     break;
                 case 'text':
-                    fabricObj = new fabric.Text(obj.text || '', {
+                    fabricObj = new FabricText(obj.text || '', {
                         left: obj.left,
                         top: obj.top,
                         fontSize: obj.fontSize || 40,
@@ -722,7 +753,7 @@ export function useEditor() {
         // Scale all objects if requested
         if (options?.scaleContent) {
             const objects = canvas.value.getObjects();
-            objects.forEach((obj) => {
+            objects.forEach((obj: FabricObjectInstance) => {
                 const newLeft = obj.left! * scaleX;
                 const newTop = obj.top! * scaleY;
 
@@ -807,7 +838,7 @@ export function useEditor() {
         let maxX = boundingRect.left + boundingRect.width;
         let maxY = boundingRect.top + boundingRect.height;
 
-        objects.forEach((obj) => {
+        objects.forEach((obj: FabricObjectInstance) => {
             const rect = obj.getBoundingRect();
             minX = Math.min(minX, rect.left);
             minY = Math.min(minY, rect.top);
@@ -873,8 +904,8 @@ export function useEditor() {
         const imagePromises: Promise<void>[] = [];
 
         for (const obj of objects) {
-            if (obj instanceof fabric.Image) {
-                const img = obj as fabric.Image;
+            if (obj instanceof FabricImage) {
+                const img = obj as ImageInstance;
                 const src = img.getSrc();
 
                 // Si la imagen no es ya un data URL, convertirla

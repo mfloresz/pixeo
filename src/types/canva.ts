@@ -1,8 +1,5 @@
 // Tipos para el editor Canva
-import type { FabricNamespace } from '../lib/fabric';
-
-// Usar el namespace de fabric para tipos
-type fabric = FabricNamespace;
+import type { CanvasInstance, FabricObjectInstance, ImageInstance, TextInstance } from '../lib/fabric';
 
 export type ActiveTool =
     | 'select'
@@ -54,9 +51,9 @@ export interface TemplateObject {
 export type ShapeType = 'rectangle' | 'circle' | 'triangle' | 'soft-rectangle' | 'inverse-triangle' | 'diamond';
 
 export interface EditorState {
-    canvas: fabric.Canvas | null;
+    canvas: CanvasInstance | null;
     activeTool: ActiveTool;
-    selectedObject: fabric.Object | null;
+    selectedObject: FabricObjectInstance | null;
     strokeColor: string;
     fillColor: string;
     strokeWidth: number;
@@ -146,8 +143,8 @@ export interface GenerateImageOptions {
     guidanceScale?: number;
 }
 
-// Tipos de fabric.js extendidos
-export type FabricObject = fabric.Object;
-export type FabricCanvas = fabric.Canvas;
-export type FabricImage = fabric.Image;
-export type FabricText = fabric.Text;
+// Tipos de fabric.js extendidos - usando los tipos de instancia
+export type FabricObject = FabricObjectInstance;
+export type FabricCanvas = CanvasInstance;
+export type FabricImageType = ImageInstance;
+export type FabricTextType = TextInstance;
