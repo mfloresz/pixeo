@@ -75,7 +75,7 @@
         <main
             :class="[
                 'flex-1 min-h-0 overflow-hidden',
-                activeTab === 'inpaint' ? 'w-full' : 'container mx-auto px-4 py-8 md:px-8 pb-32 overflow-y-auto'
+                ['inpaint', 'editor'].includes(activeTab) ? 'w-full' : 'container mx-auto px-4 py-8 md:px-8 pb-32 overflow-y-auto'
             ]"
         >
             <Transition name="fade" mode="out-in">
@@ -103,8 +103,12 @@
                     </div>
                 </div>
 
-                <div v-else-if="activeTab === 'inpaint'" key="inpaint" class="h-full">
+<div v-else-if="activeTab === 'inpaint'" key="inpaint" class="h-full">
                     <InpaintView />
+                </div>
+
+                <div v-else-if="activeTab === 'editor'" key="editor" class="h-full">
+                    <EditorView />
                 </div>
 
                 <div v-else-if="activeTab === 'library'" key="library">
@@ -207,7 +211,7 @@ import { i18n } from "./i18n";
 const { t } = i18n.global;
 import { storeToRefs } from "pinia";
 import { nextTick } from "vue";
-import { Image, Settings, Library, Trash2, Download, Wand2 } from "lucide-vue-next";
+import { Image, Settings, Library, Trash2, Download, Wand2, Pencil } from "lucide-vue-next";
 import Toaster from "./components/ui/Toaster.vue";
 import { useConfigStore } from "./stores/config";
 import { useHistoryStore } from "./stores/history";
@@ -219,6 +223,7 @@ import LibraryItem from "./components/library/LibraryItem.vue";
 import ZoomModal from "./components/zoom/ZoomModal.vue";
 import GenerationHistory from "./components/generate/GenerationHistory.vue";
 import InpaintView from "./components/inpaint/InpaintView.vue";
+import EditorView from "./components/editor/EditorView.vue";
 import { useInpaintStore } from "./stores/inpaint";
 import {
     Tooltip,
@@ -324,6 +329,7 @@ function closeZoom() {
 const tabs = [
     { id: "generate", icon: Image },
     { id: "inpaint", icon: Wand2 },
+    { id: "editor", icon: Pencil },
     { id: "library", icon: Library },
     { id: "settings", icon: Settings },
 ];

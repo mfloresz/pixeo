@@ -160,6 +160,32 @@ export const useHistoryStore = defineStore("history", () => {
     sessionItems.value.unshift(fullItem);
   }
 
+  async function addEditorProject(name: string, blob: Blob, metadata?: { width?: number; height?: number; layerCount?: number }) {
+    if (!db) await initDB();
+    const id = `editor-${Date.now()}`;
+    const fullItem: HistoryItem = {
+      id,
+      type: "image",
+      mode: "editor-project",
+      model: "editor",
+      params: {
+        name,
+        ...metadata,
+      },
+      timestamp: new Date(),
+      blobKey: id,
+    };
+
+    await db!.put(STORE_NAME, fullItem);
+    await db!.put(BLOB_STORE, blob, fullItem.id);
+
+    // Generate thumbnail from canvas preview if needed
+    // For now, we'll skip thumbnail generation for editor projects
+    
+    items.value.unshift(fullItem);
+    return id;
+  }
+
   function clearSession() {
     sessionItems.value = [];
   }
@@ -381,6 +407,7 @@ export const useHistoryStore = defineStore("history", () => {
     items,
     sessionItems,
     addItem,
+    addEditorProject,
     getBlob,
     getThumbnail,
     removeItem,
