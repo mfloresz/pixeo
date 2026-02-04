@@ -25,6 +25,9 @@
       
       <!-- Settings Panel -->
       <SettingsPanel v-else-if="editorStore.activeTool === 'settings'" />
+      
+      <!-- Image Library Panel -->
+      <ImageLibraryPanel v-else-if="editorStore.activeTool === 'image'" />
     </div>
   </div>
 </template>
@@ -35,6 +38,7 @@ import { useEditorStore } from "../../stores/editor";
 import TextPanel from "./sidebar/TextPanel.vue";
 import ElementsPanel from "./sidebar/ElementsPanel.vue";
 import SettingsPanel from "./sidebar/SettingsPanel.vue";
+import ImageLibraryPanel from "./sidebar/ImageLibraryPanel.vue";
 
 const editorStore = useEditorStore();
 
@@ -46,6 +50,8 @@ function getSidebarTitle() {
       return "Elements";
     case "settings":
       return "Canvas Settings";
+    case "image":
+      return "Image Library";
     default:
       return "";
   }

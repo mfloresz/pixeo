@@ -78,4 +78,4 @@ export interface EditorProject {
 }
 
 // Sidebar types
-export type SidebarTool = "text" | "elements" | "settings";
+export type SidebarTool = "text" | "elements" | "settings" | "image";

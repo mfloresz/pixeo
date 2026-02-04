@@ -26,24 +26,17 @@
       <Type class="w-5 h-5" />
     </button>
     
-    <!-- Image Tool -->
+    <!-- Image Tool - Opens sidebar with library -->
     <button
-      @click="triggerImageUpload"
+      @click="toggleImageTool"
       :class="[
         'p-3 rounded-xl transition-all',
-        activeTool === 'image' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+        isImageActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'
       ]"
       title="Add Image"
     >
       <ImageIcon class="w-5 h-5" />
     </button>
-    <input
-      ref="imageInput"
-      type="file"
-      accept="image/*"
-      class="hidden"
-      @change="handleImageUpload"
-    />
     
     <div class="w-8 h-px bg-border my-1" />
     
@@ -121,16 +114,16 @@ import {
 
 const editorStore = useEditorStore();
 const activeTool = ref("select");
-const imageInput = ref<HTMLInputElement | null>(null);
 
 const isTextActive = computed(() => editorStore.activeTool === "text" && editorStore.sidebarVisible);
 const isElementsActive = computed(() => editorStore.activeTool === "elements" && editorStore.sidebarVisible);
 const isSettingsActive = computed(() => editorStore.activeTool === "settings" && editorStore.sidebarVisible);
+const isImageActive = computed(() => editorStore.activeTool === "image" && editorStore.sidebarVisible);
 
 function setTool(tool: string) {
   activeTool.value = tool;
   // Close sidebar when selecting a non-sidebar tool
-  if (tool !== "text" && tool !== "elements" && tool !== "settings") {
+  if (tool !== "text" && tool !== "elements" && tool !== "settings" && tool !== "image") {
     editorStore.closeSidebar();
   }
 }
@@ -162,29 +155,12 @@ function toggleSettingsTool() {
   }
 }
 
-function triggerImageUpload() {
-  activeTool.value = "image";
-  editorStore.closeSidebar();
-  imageInput.value?.click();
-}
-
-function handleImageUpload(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const file = input.files?.[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const src = e.target?.result as string;
-    editorStore.addLayer("image", {
-      src,
-      x: editorStore.canvasWidth / 2,
-      y: editorStore.canvasHeight / 2,
-    });
-  };
-  reader.readAsDataURL(file);
-  
-  input.value = "";
-  activeTool.value = "select";
+function toggleImageTool() {
+  editorStore.toggleTool("image");
+  if (editorStore.sidebarVisible) {
+    activeTool.value = "image";
+  } else {
+    activeTool.value = "select";
+  }
 }
 </script>
