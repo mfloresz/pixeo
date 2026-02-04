@@ -9,7 +9,7 @@ export type HistoryItem = {
 };
 
 // Editor Types
-export type EditorLayerType = "text" | "image" | "rect" | "circle" | "line" | "star" | "arrow";
+export type EditorLayerType = "text" | "image" | "rect" | "circle" | "ellipse" | "line" | "star" | "arrow" | "polygon";
 
 export interface EditorLayer {
   id: string;
@@ -34,7 +34,22 @@ export interface EditorLayer {
   strokeWidth?: number;
   // Shape specific
   radius?: number;
+  radiusX?: number; // Ellipse
+  radiusY?: number; // Ellipse
+  sides?: number; // RegularPolygon
   points?: number[];
+  // Star specific
+  numPoints?: number;
+  innerRadius?: number;
+  outerRadius?: number;
+  // Arrow specific
+  pointerLength?: number;
+  pointerWidth?: number;
+  pointerAtBeginning?: boolean;
+  pointerAtEnding?: boolean;
+  // Line specific
+  dash?: number[];
+  closed?: boolean;
   // Image specific
   src?: string;
   // Common
@@ -61,3 +76,6 @@ export interface EditorProject {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// Sidebar types
+export type SidebarTool = "text" | "elements" | "settings";

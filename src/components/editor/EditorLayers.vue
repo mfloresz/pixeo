@@ -122,6 +122,9 @@ import {
   Square,
   Circle,
   Minus,
+  ArrowRight,
+  Star,
+  Triangle,
   MoreVertical,
   Copy,
   ArrowUp,
@@ -153,7 +156,11 @@ function getLayerIcon(type: EditorLayerType) {
     case "image": return ImageIcon;
     case "rect": return Square;
     case "circle": return Circle;
+    case "ellipse": return Circle;
     case "line": return Minus;
+    case "arrow": return ArrowRight;
+    case "star": return Star;
+    case "polygon": return Triangle;
     default: return Square;
   }
 }

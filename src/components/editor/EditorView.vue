@@ -138,6 +138,9 @@
       <!-- Left Sidebar - Tools -->
       <EditorToolbar class="w-16 border-r bg-muted/20 shrink-0" />
       
+      <!-- Dynamic Sidebar - Shows based on active tool -->
+      <EditorSidebar />
+      
       <!-- Center - Canvas Area (allows scrolling when zoomed) -->
       <div class="flex-1 min-w-0 min-h-0 flex">
         <EditorCanvas
@@ -225,10 +228,11 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { toast } from "vue-sonner";
-import { Undo2, Redo2, Download, Save, LayoutTemplate, Type, Image as ImageIcon, Square, Circle, Minus, ZoomIn, ZoomOut, Minimize } from "lucide-vue-next";
+import { Undo2, Redo2, Download, Save, LayoutTemplate, Type, Image as ImageIcon, Square, Circle, Minus, ArrowRight, Star, Triangle, ZoomIn, ZoomOut, Minimize } from "lucide-vue-next";
 import { useEditorStore } from "../../stores/editor";
 import type { EditorTemplate, EditorLayer, EditorLayerType } from "../../types";
 import EditorToolbar from "./EditorToolbar.vue";
+import EditorSidebar from "./EditorSidebar.vue";
 import EditorCanvas from "./EditorCanvas.vue";
 import EditorLayers from "./EditorLayers.vue";
 import EditorTemplates from "./EditorTemplates.vue";
@@ -248,7 +252,11 @@ function getLayerIcon(type: EditorLayerType) {
     case "image": return ImageIcon;
     case "rect": return Square;
     case "circle": return Circle;
+    case "ellipse": return Circle;
     case "line": return Minus;
+    case "arrow": return ArrowRight;
+    case "star": return Star;
+    case "polygon": return Triangle;
     default: return Square;
   }
 }

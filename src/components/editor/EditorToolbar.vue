@@ -14,14 +14,14 @@
     
     <div class="w-8 h-px bg-border my-1" />
     
-    <!-- Text Tool -->
+    <!-- Text Tool - Opens sidebar with presets -->
     <button
-      @click="addText"
+      @click="toggleTextTool"
       :class="[
         'p-3 rounded-xl transition-all',
-        activeTool === 'text' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+        isTextActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'
       ]"
-      title="Add Text"
+      title="Text"
     >
       <Type class="w-5 h-5" />
     </button>
@@ -29,7 +29,10 @@
     <!-- Image Tool -->
     <button
       @click="triggerImageUpload"
-      class="p-3 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
+      :class="[
+        'p-3 rounded-xl transition-all',
+        activeTool === 'image' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+      ]"
       title="Add Image"
     >
       <ImageIcon class="w-5 h-5" />
@@ -44,107 +47,31 @@
     
     <div class="w-8 h-px bg-border my-1" />
     
-    <!-- Rectangle Tool -->
+    <!-- Elements Tool - Opens sidebar with shapes and lines -->
     <button
-      @click="addRectangle"
+      @click="toggleElementsTool"
       :class="[
         'p-3 rounded-xl transition-all',
-        activeTool === 'rect' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+        isElementsActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'
       ]"
-      title="Add Rectangle"
+      title="Elements (Shapes & Lines)"
     >
-      <Square class="w-5 h-5" />
-    </button>
-    
-    <!-- Circle Tool -->
-    <button
-      @click="addCircle"
-      :class="[
-        'p-3 rounded-xl transition-all',
-        activeTool === 'circle' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'
-      ]"
-      title="Add Circle"
-    >
-      <Circle class="w-5 h-5" />
-    </button>
-    
-    <!-- Line Tool -->
-    <button
-      @click="addLine"
-      :class="[
-        'p-3 rounded-xl transition-all',
-        activeTool === 'line' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'
-      ]"
-      title="Add Line"
-    >
-      <Minus class="w-5 h-5" />
+      <Shapes class="w-5 h-5" />
     </button>
     
     <div class="w-8 h-px bg-border my-1" />
     
-    <!-- Background Color -->
-    <Popover>
-      <PopoverTrigger as-child>
-        <button
-          class="p-3 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
-          title="Background Color"
-        >
-          <Palette class="w-5 h-5" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent class="w-64">
-        <div class="space-y-4">
-          <div>
-            <label class="text-sm font-medium mb-2 block">Background Color</label>
-            <div class="grid grid-cols-6 gap-2">
-              <button
-                v-for="color in presetColors"
-                :key="color"
-                @click="setBackgroundColor(color)"
-                :class="[
-                  'w-8 h-8 rounded-lg border-2 transition-all',
-                  editorStore.backgroundColor === color ? 'border-primary scale-110' : 'border-transparent'
-                ]"
-                :style="{ backgroundColor: color }"
-              />
-            </div>
-          </div>
-          <div>
-            <label class="text-sm font-medium mb-2 block">Custom Color</label>
-            <input
-              v-model="editorStore.backgroundColor"
-              type="color"
-              class="w-full h-10 rounded-lg cursor-pointer"
-            />
-          </div>
-          <div>
-            <label class="text-sm font-medium mb-2 block">Background Image</label>
-            <div class="flex gap-2">
-              <button
-                @click="triggerBgImageUpload"
-                class="flex-1 px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm transition-colors"
-              >
-                Upload
-              </button>
-              <button
-                v-if="editorStore.backgroundImage"
-                @click="clearBackgroundImage"
-                class="px-3 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg text-sm transition-colors"
-              >
-                <X class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-    <input
-      ref="bgImageInput"
-      type="file"
-      accept="image/*"
-      class="hidden"
-      @change="handleBgImageUpload"
-    />
+    <!-- Settings Tool - Opens sidebar with canvas settings -->
+    <button
+      @click="toggleSettingsTool"
+      :class="[
+        'p-3 rounded-xl transition-all',
+        isSettingsActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+      ]"
+      title="Canvas Settings"
+    >
+      <Settings class="w-5 h-5" />
+    </button>
     
     <div class="flex-1" />
     
@@ -177,14 +104,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { MousePointer2, Type, Image as ImageIcon, Square, Circle, Minus, Palette, Trash2, X } from "lucide-vue-next";
+import { computed, ref } from "vue";
+import { MousePointer2, Type, Image as ImageIcon, Shapes, Settings, Trash2 } from "lucide-vue-next";
 import { useEditorStore } from "../../stores/editor";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -200,66 +122,49 @@ import {
 const editorStore = useEditorStore();
 const activeTool = ref("select");
 const imageInput = ref<HTMLInputElement | null>(null);
-const bgImageInput = ref<HTMLInputElement | null>(null);
 
-const presetColors = [
-  "#ffffff", "#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#94a3b8",
-  "#1e293b", "#0f172a", "#000000", "#ef4444", "#f97316", "#f59e0b",
-  "#84cc16", "#22c55e", "#10b981", "#14b8a6", "#06b6d4", "#0ea5e9",
-  "#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899",
-];
+const isTextActive = computed(() => editorStore.activeTool === "text" && editorStore.sidebarVisible);
+const isElementsActive = computed(() => editorStore.activeTool === "elements" && editorStore.sidebarVisible);
+const isSettingsActive = computed(() => editorStore.activeTool === "settings" && editorStore.sidebarVisible);
 
 function setTool(tool: string) {
   activeTool.value = tool;
+  // Close sidebar when selecting a non-sidebar tool
+  if (tool !== "text" && tool !== "elements" && tool !== "settings") {
+    editorStore.closeSidebar();
+  }
 }
 
-function addText() {
-  activeTool.value = "text";
-  editorStore.addLayer("text", {
-    text: "Double click to edit",
-    fontSize: 24,
-    fontFamily: "Arial",
-    fill: "#000000",
-    x: editorStore.canvasWidth / 2 - 100,
-    y: editorStore.canvasHeight / 2 - 20,
-    width: 200,
-    height: 50,
-  });
+function toggleTextTool() {
+  editorStore.toggleTool("text");
+  if (editorStore.sidebarVisible) {
+    activeTool.value = "text";
+  } else {
+    activeTool.value = "select";
+  }
 }
 
-function addRectangle() {
-  activeTool.value = "rect";
-  editorStore.addLayer("rect", {
-    width: 100,
-    height: 100,
-    fill: "#3b82f6",
-    x: editorStore.canvasWidth / 2 - 50,
-    y: editorStore.canvasHeight / 2 - 50,
-  });
+function toggleElementsTool() {
+  editorStore.toggleTool("elements");
+  if (editorStore.sidebarVisible) {
+    activeTool.value = "elements";
+  } else {
+    activeTool.value = "select";
+  }
 }
 
-function addCircle() {
-  activeTool.value = "circle";
-  editorStore.addLayer("circle", {
-    radius: 50,
-    fill: "#3b82f6",
-    x: editorStore.canvasWidth / 2,
-    y: editorStore.canvasHeight / 2,
-  });
-}
-
-function addLine() {
-  activeTool.value = "line";
-  editorStore.addLayer("line", {
-    points: [0, 0, 100, 0],
-    stroke: "#000000",
-    strokeWidth: 2,
-    x: editorStore.canvasWidth / 2 - 50,
-    y: editorStore.canvasHeight / 2,
-  });
+function toggleSettingsTool() {
+  editorStore.toggleTool("settings");
+  if (editorStore.sidebarVisible) {
+    activeTool.value = "settings";
+  } else {
+    activeTool.value = "select";
+  }
 }
 
 function triggerImageUpload() {
+  activeTool.value = "image";
+  editorStore.closeSidebar();
   imageInput.value?.click();
 }
 
@@ -280,32 +185,6 @@ function handleImageUpload(event: Event) {
   reader.readAsDataURL(file);
   
   input.value = "";
-}
-
-function setBackgroundColor(color: string) {
-  editorStore.setBackgroundColor(color);
-}
-
-function triggerBgImageUpload() {
-  bgImageInput.value?.click();
-}
-
-function handleBgImageUpload(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const file = input.files?.[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const src = e.target?.result as string;
-    editorStore.setBackgroundImage(src);
-  };
-  reader.readAsDataURL(file);
-  
-  input.value = "";
-}
-
-function clearBackgroundImage() {
-  editorStore.setBackgroundImage(undefined);
+  activeTool.value = "select";
 }
 </script>

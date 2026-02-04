@@ -1,6 +1,6 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
-import type { EditorLayer, EditorLayerType, EditorTemplate, EditorProject } from "../types";
+import type { EditorLayer, EditorLayerType, EditorTemplate, EditorProject, SidebarTool } from "../types";
 import { useHistoryStore } from "./history";
 
 // Predefined templates
@@ -60,6 +60,10 @@ export const useEditorStore = defineStore("editor", () => {
   
   // Templates
   const availableTemplates = ref<EditorTemplate[]>(templates);
+  
+  // Sidebar state
+  const activeTool = ref<SidebarTool | null>(null);
+  const sidebarVisible = ref(false);
   
   // Computed
   const selectedLayer = computed(() => {
@@ -149,10 +153,27 @@ export const useEditorStore = defineStore("editor", () => {
       baseLayer.height = config?.height || 100;
     } else if (type === "circle") {
       baseLayer.radius = config?.radius || 50;
+    } else if (type === "ellipse") {
+      baseLayer.radiusX = config?.radiusX || 60;
+      baseLayer.radiusY = config?.radiusY || 40;
     } else if (type === "line") {
       baseLayer.points = config?.points || [0, 0, 100, 0];
       baseLayer.stroke = config?.stroke || "#000000";
       baseLayer.strokeWidth = config?.strokeWidth || 2;
+    } else if (type === "star") {
+      baseLayer.numPoints = config?.numPoints || 5;
+      baseLayer.innerRadius = config?.innerRadius || 30;
+      baseLayer.outerRadius = config?.outerRadius || 60;
+    } else if (type === "arrow") {
+      baseLayer.points = config?.points || [0, 0, 100, 0];
+      baseLayer.pointerLength = config?.pointerLength || 15;
+      baseLayer.pointerWidth = config?.pointerWidth || 12;
+      baseLayer.stroke = config?.stroke || "#000000";
+      baseLayer.strokeWidth = config?.strokeWidth || 2;
+      baseLayer.pointerAtEnding = config?.pointerAtEnding !== false;
+    } else if (type === "polygon") {
+      baseLayer.sides = config?.sides || 3;
+      baseLayer.radius = config?.radius || 50;
     }
     
     saveToHistory();
@@ -324,6 +345,27 @@ export const useEditorStore = defineStore("editor", () => {
   // Initialize with empty state
   initNewProject();
   
+  // Sidebar actions
+  function openSidebar(tool: SidebarTool) {
+    activeTool.value = tool;
+    sidebarVisible.value = true;
+  }
+  
+  function closeSidebar() {
+    sidebarVisible.value = false;
+    activeTool.value = null;
+  }
+  
+  function toggleTool(tool: SidebarTool) {
+    if (activeTool.value === tool && sidebarVisible.value) {
+      // Same tool clicked again - close sidebar
+      closeSidebar();
+    } else {
+      // Different tool or sidebar closed - open with new tool
+      openSidebar(tool);
+    }
+  }
+  
   return {
     // State
     canvasWidth,
@@ -338,6 +380,8 @@ export const useEditorStore = defineStore("editor", () => {
     zoom,
     minZoom,
     maxZoom,
+    activeTool,
+    sidebarVisible,
     
     // Computed
     selectedLayer,
@@ -370,5 +414,8 @@ export const useEditorStore = defineStore("editor", () => {
     zoomIn,
     zoomOut,
     resetZoom,
+    openSidebar,
+    closeSidebar,
+    toggleTool,
   };
 });

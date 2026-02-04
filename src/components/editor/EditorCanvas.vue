@@ -68,10 +68,49 @@
                 :config="getLayerConfig(layer)"
               />
               
-              <!-- Image Layer -->
+              <!-- Ellipse Layer -->
+              <v-ellipse
+                v-else-if="layer.type === 'ellipse'"
+                :config="getLayerConfig(layer)"
+              />
+              
+              <!-- Star Layer -->
+              <v-star
+                v-else-if="layer.type === 'star'"
+                :config="getLayerConfig(layer)"
+              />
+              
+              <!-- Arrow Layer -->
+              <v-arrow
+                v-else-if="layer.type === 'arrow'"
+                :config="getLayerConfig(layer)"
+              />
+              
+              <!-- Polygon (RegularPolygon) Layer -->
+              <v-regular-polygon
+                v-else-if="layer.type === 'polygon'"
+                :config="getLayerConfig(layer)"
+              />
+              
+              <!-- Image Layer - Show placeholder while loading -->
               <v-image
                 v-else-if="layer.type === 'image' && imageNodes[layer.id]"
                 :config="getImageLayerConfig(layer)"
+              />
+              <v-rect
+                v-else-if="layer.type === 'image' && !imageNodes[layer.id]"
+                :config="{
+                  id: layer.id,
+                  x: layer.x - 50,
+                  y: layer.y - 50,
+                  width: 100,
+                  height: 100,
+                  fill: '#e2e8f0',
+                  stroke: '#94a3b8',
+                  strokeWidth: 2,
+                  draggable: false,
+                  listening: false,
+                }"
               />
             </template>
             
@@ -199,22 +238,44 @@ watch(() => editorStore.backgroundImage, async (src) => {
 });
 
 // Load image layers
-watch(() => editorStore.layers, async (newLayers) => {
+watch(() => editorStore.layers, async (newLayers, oldLayers) => {
+  // Find new image layers that need to be loaded
+  const oldIds = new Set(oldLayers?.filter(l => l.type === "image").map(l => l.id) || []);
+  let imagesLoaded = false;
+  
   for (const layer of newLayers) {
-    if (layer.type === "image" && layer.src && !imageNodes.value[layer.id]) {
-      const img = new Image();
-      img.src = layer.src;
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-      
-      // Set default dimensions if not set
-      if (!layer.width) {
-        editorStore.updateLayer(layer.id, { width: img.width, height: img.height });
+    if (layer.type === "image" && layer.src && (!imageNodes.value[layer.id] || !oldIds.has(layer.id))) {
+      try {
+        const img = new Image();
+        img.src = layer.src;
+        
+        // Wait for image to load
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+        
+        // Set default dimensions if not set
+        if (!layer.width || !layer.height) {
+          editorStore.updateLayer(layer.id, { 
+            width: img.naturalWidth || img.width, 
+            height: img.naturalHeight || img.height 
+          });
+        }
+        
+        imageNodes.value[layer.id] = markRaw(img);
+        imagesLoaded = true;
+      } catch (error) {
+        console.error(`Failed to load image for layer ${layer.id}:`, error);
       }
-      
-      imageNodes.value[layer.id] = markRaw(img);
     }
+  }
+  
+  // Force redraw if images were loaded
+  if (imagesLoaded && stageRef.value) {
+    await nextTick();
+    const stage = stageRef.value.getStage() as Konva.Stage;
+    stage.batchDraw();
   }
   
   // Cleanup removed images
@@ -224,7 +285,7 @@ watch(() => editorStore.layers, async (newLayers) => {
       delete imageNodes.value[id];
     }
   }
-}, { deep: false });
+}, { deep: true, flush: 'post' });
 
 // Update transformer when selection changes - careful to avoid loops
 watch(() => editorStore.selectedLayerId, async (layerId) => {
@@ -301,8 +362,40 @@ function getLayerConfig(layer: EditorLayer) {
     baseConfig.fill = layer.fill;
     baseConfig.stroke = layer.stroke;
     baseConfig.strokeWidth = layer.strokeWidth;
+  } else if (layer.type === 'ellipse') {
+    baseConfig.radiusX = layer.radiusX;
+    baseConfig.radiusY = layer.radiusY;
+    baseConfig.fill = layer.fill;
+    baseConfig.stroke = layer.stroke;
+    baseConfig.strokeWidth = layer.strokeWidth;
   } else if (layer.type === 'line') {
     baseConfig.points = layer.points;
+    baseConfig.stroke = layer.stroke;
+    baseConfig.strokeWidth = layer.strokeWidth;
+    baseConfig.dash = layer.dash;
+    if (layer.closed) {
+      baseConfig.closed = layer.closed;
+    }
+  } else if (layer.type === 'star') {
+    baseConfig.numPoints = layer.numPoints;
+    baseConfig.innerRadius = layer.innerRadius;
+    baseConfig.outerRadius = layer.outerRadius;
+    baseConfig.fill = layer.fill;
+    baseConfig.stroke = layer.stroke;
+    baseConfig.strokeWidth = layer.strokeWidth;
+  } else if (layer.type === 'arrow') {
+    baseConfig.points = layer.points;
+    baseConfig.pointerLength = layer.pointerLength;
+    baseConfig.pointerWidth = layer.pointerWidth;
+    baseConfig.pointerAtBeginning = layer.pointerAtBeginning;
+    baseConfig.pointerAtEnding = layer.pointerAtEnding;
+    baseConfig.stroke = layer.stroke;
+    baseConfig.strokeWidth = layer.strokeWidth;
+    baseConfig.fill = layer.stroke; // Arrow fill matches stroke
+  } else if (layer.type === 'polygon') {
+    baseConfig.sides = layer.sides;
+    baseConfig.radius = layer.radius;
+    baseConfig.fill = layer.fill;
     baseConfig.stroke = layer.stroke;
     baseConfig.strokeWidth = layer.strokeWidth;
   }
@@ -311,13 +404,19 @@ function getLayerConfig(layer: EditorLayer) {
 }
 
 function getImageLayerConfig(layer: EditorLayer) {
+  const img = imageNodes.value[layer.id];
+  const width = layer.width || img?.naturalWidth || img?.width || 100;
+  const height = layer.height || img?.naturalHeight || img?.height || 100;
+  
   return {
     id: layer.id,
     x: layer.x,
     y: layer.y,
-    image: imageNodes.value[layer.id],
-    width: layer.width,
-    height: layer.height,
+    image: img,
+    width: width,
+    height: height,
+    offsetX: width / 2,
+    offsetY: height / 2,
     rotation: layer.rotation,
     scaleX: layer.scaleX,
     scaleY: layer.scaleY,
@@ -378,6 +477,34 @@ function handleStageMouseDown(e: any) {
       // Update radius for circles
       if (layer.type === "circle") {
         layer.radius = (layer.radius || 50) * node.scaleX();
+      }
+      
+      // Update radii for ellipses
+      if (layer.type === "ellipse") {
+        layer.radiusX = (layer.radiusX || 60) * node.scaleX();
+        layer.radiusY = (layer.radiusY || 40) * node.scaleY();
+      }
+      
+      // Update radii for stars
+      if (layer.type === "star") {
+        layer.innerRadius = (layer.innerRadius || 30) * node.scaleX();
+        layer.outerRadius = (layer.outerRadius || 60) * node.scaleX();
+      }
+      
+      // Update radius for polygons
+      if (layer.type === "polygon") {
+        layer.radius = (layer.radius || 50) * node.scaleX();
+      }
+      
+      // Handle text transformation - update fontSize and dimensions
+      if (layer.type === "text") {
+        layer.fontSize = (layer.fontSize || 24) * node.scaleX();
+        if (layer.width) {
+          layer.width = layer.width * node.scaleX();
+        }
+        if (layer.height) {
+          layer.height = layer.height * node.scaleY();
+        }
       }
       
       // Reset node scale
