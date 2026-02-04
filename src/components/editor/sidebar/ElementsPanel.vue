@@ -93,15 +93,26 @@
           <span class="text-xs text-muted-foreground">Square</span>
         </button>
 
-        <!-- Star -->
+        <!-- Star 5p -->
         <button
-          @click="addStar()"
+          @click="addStar(5)"
           class="p-4 border rounded-xl hover:border-primary hover:bg-muted/50 transition-all flex flex-col items-center gap-2"
         >
-          <svg class="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9"/>
+          <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="#d1d5db" stroke="currentColor"/>
           </svg>
-          <span class="text-xs text-muted-foreground">Star</span>
+          <span class="text-xs text-muted-foreground">Star 5p</span>
+        </button>
+
+        <!-- Star 6p -->
+        <button
+          @click="addStar(6)"
+          class="p-4 border rounded-xl hover:border-primary hover:bg-muted/50 transition-all flex flex-col items-center gap-2"
+        >
+          <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="12,2 14,8 20,8 15,12 17,18 12,14 7,18 9,12 4,8 10,8" fill="#d1d5db" stroke="currentColor"/>
+          </svg>
+          <span class="text-xs text-muted-foreground">Star 6p</span>
         </button>
 
         <!-- Triangle -->
@@ -109,10 +120,54 @@
           @click="addShape('triangle')"
           class="p-4 border rounded-xl hover:border-primary hover:bg-muted/50 transition-all flex flex-col items-center gap-2"
         >
-          <svg class="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="12,4 20,20 4,20"/>
+          <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="12,4 20,20 4,20" fill="#d1d5db" stroke="currentColor"/>
           </svg>
           <span class="text-xs text-muted-foreground">Triangle</span>
+        </button>
+
+        <!-- Pentagon -->
+        <button
+          @click="addShape('pentagon')"
+          class="p-4 border rounded-xl hover:border-primary hover:bg-muted/50 transition-all flex flex-col items-center gap-2"
+        >
+          <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="12,2 22,9 18,20 6,20 2,9" fill="#d1d5db" stroke="currentColor"/>
+          </svg>
+          <span class="text-xs text-muted-foreground">Pentagon</span>
+        </button>
+
+        <!-- Hexagon -->
+        <button
+          @click="addShape('hexagon')"
+          class="p-4 border rounded-xl hover:border-primary hover:bg-muted/50 transition-all flex flex-col items-center gap-2"
+        >
+          <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" fill="#d1d5db" stroke="currentColor"/>
+          </svg>
+          <span class="text-xs text-muted-foreground">Hexagon</span>
+        </button>
+
+        <!-- Heart -->
+        <button
+          @click="addHeart()"
+          class="p-4 border rounded-xl hover:border-primary hover:bg-muted/50 transition-all flex flex-col items-center gap-2"
+        >
+          <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#d1d5db" stroke="currentColor"/>
+          </svg>
+          <span class="text-xs text-muted-foreground">Heart</span>
+        </button>
+
+        <!-- Double Arrow -->
+        <button
+          @click="addDoubleArrow()"
+          class="p-4 border rounded-xl hover:border-primary hover:bg-muted/50 transition-all flex flex-col items-center gap-2"
+        >
+          <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4" fill="#d1d5db" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="text-xs text-muted-foreground">Double Arrow</span>
         </button>
       </div>
     </div>
@@ -177,35 +232,40 @@ function addArrow() {
   toast.success("Arrow added");
 }
 
-function addStar() {
+function addStar(points: number = 5) {
   const centerX = editorStore.canvasWidth / 2;
   const centerY = editorStore.canvasHeight / 2;
 
   // Konva.Star uses numPoints, innerRadius, outerRadius
   editorStore.addLayer("star", {
-    numPoints: 5,
-    innerRadius: 30,
+    numPoints: points,
+    innerRadius: points === 6 ? 25 : 30,
     outerRadius: 60,
-    fill: "#f59e0b",
-    stroke: "#000000",
+    fill: "#3b82f6",
+    stroke: "#1e40af",
     strokeWidth: 2,
     x: centerX,
     y: centerY,
   });
 
-  toast.success("Star added");
+  toast.success(`Star ${points}p added`);
 }
 
-function addShape(type: "rect" | "circle" | "ellipse" | "square" | "triangle") {
+function addShape(type: "rect" | "circle" | "ellipse" | "square" | "triangle" | "pentagon" | "hexagon") {
   const centerX = editorStore.canvasWidth / 2;
   const centerY = editorStore.canvasHeight / 2;
+
+  const defaultFill = "#3b82f6";
+  const defaultStroke = "#1e40af";
 
   switch (type) {
     case "rect":
       editorStore.addLayer("rect", {
         width: 120,
         height: 80,
-        fill: "#3b82f6",
+        fill: defaultFill,
+        stroke: defaultStroke,
+        strokeWidth: 2,
         x: centerX,
         y: centerY,
       });
@@ -214,7 +274,9 @@ function addShape(type: "rect" | "circle" | "ellipse" | "square" | "triangle") {
     case "circle":
       editorStore.addLayer("circle", {
         radius: 50,
-        fill: "#3b82f6",
+        fill: defaultFill,
+        stroke: defaultStroke,
+        strokeWidth: 2,
         x: centerX,
         y: centerY,
       });
@@ -225,7 +287,9 @@ function addShape(type: "rect" | "circle" | "ellipse" | "square" | "triangle") {
       editorStore.addLayer("ellipse", {
         radiusX: 60,
         radiusY: 40,
-        fill: "#3b82f6",
+        fill: defaultFill,
+        stroke: defaultStroke,
+        strokeWidth: 2,
         x: centerX,
         y: centerY,
       });
@@ -235,7 +299,9 @@ function addShape(type: "rect" | "circle" | "ellipse" | "square" | "triangle") {
       editorStore.addLayer("rect", {
         width: 100,
         height: 100,
-        fill: "#3b82f6",
+        fill: defaultFill,
+        stroke: defaultStroke,
+        strokeWidth: 2,
         x: centerX,
         y: centerY,
       });
@@ -246,8 +312,34 @@ function addShape(type: "rect" | "circle" | "ellipse" | "square" | "triangle") {
       editorStore.addLayer("polygon", {
         sides: 3,
         radius: 60,
-        fill: "#3b82f6",
-        stroke: "#000000",
+        fill: defaultFill,
+        stroke: defaultStroke,
+        strokeWidth: 2,
+        x: centerX,
+        y: centerY,
+      });
+      break;
+
+    case "pentagon":
+      // Konva.RegularPolygon uses sides and radius (pentagon = 5 sides)
+      editorStore.addLayer("polygon", {
+        sides: 5,
+        radius: 60,
+        fill: defaultFill,
+        stroke: defaultStroke,
+        strokeWidth: 2,
+        x: centerX,
+        y: centerY,
+      });
+      break;
+
+    case "hexagon":
+      // Konva.RegularPolygon uses sides and radius (hexagon = 6 sides)
+      editorStore.addLayer("polygon", {
+        sides: 6,
+        radius: 60,
+        fill: defaultFill,
+        stroke: defaultStroke,
         strokeWidth: 2,
         x: centerX,
         y: centerY,
@@ -256,5 +348,43 @@ function addShape(type: "rect" | "circle" | "ellipse" | "square" | "triangle") {
   }
 
   toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} added`);
+}
+
+function addHeart() {
+  const centerX = editorStore.canvasWidth / 2;
+  const centerY = editorStore.canvasHeight / 2;
+
+  // Konva.Path for heart shape
+  editorStore.addLayer("path", {
+    data: "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z",
+    fill: "#3b82f6",
+    stroke: "#1e40af",
+    strokeWidth: 2,
+    scaleX: 3,
+    scaleY: 3,
+    x: centerX - 36,
+    y: centerY - 32,
+  });
+
+  toast.success("Heart added");
+}
+
+function addDoubleArrow() {
+  const centerX = editorStore.canvasWidth / 2;
+  const centerY = editorStore.canvasHeight / 2;
+
+  // Konva.Path for double-headed arrow
+  editorStore.addLayer("path", {
+    data: "M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4",
+    fill: "#3b82f6",
+    stroke: "#1e40af",
+    strokeWidth: 3,
+    scaleX: 2,
+    scaleY: 2,
+    x: centerX - 24,
+    y: centerY - 24,
+  });
+
+  toast.success("Double arrow added");
 }
 </script>

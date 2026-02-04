@@ -9,7 +9,7 @@ export type HistoryItem = {
 };
 
 // Editor Types
-export type EditorLayerType = "text" | "image" | "rect" | "circle" | "ellipse" | "line" | "star" | "arrow" | "polygon";
+export type EditorLayerType = "text" | "image" | "rect" | "circle" | "ellipse" | "line" | "star" | "arrow" | "polygon" | "path";
 
 export interface EditorLayer {
   id: string;
@@ -52,6 +52,8 @@ export interface EditorLayer {
   closed?: boolean;
   // Image specific
   src?: string;
+  // Path specific
+  data?: string;
   // Common
   draggable: boolean;
 }

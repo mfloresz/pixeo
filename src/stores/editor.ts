@@ -174,6 +174,8 @@ export const useEditorStore = defineStore("editor", () => {
     } else if (type === "polygon") {
       baseLayer.sides = config?.sides || 3;
       baseLayer.radius = config?.radius || 50;
+    } else if (type === "path") {
+      baseLayer.data = config?.data || "";
     }
     
     saveToHistory();

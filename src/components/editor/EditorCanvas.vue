@@ -92,6 +92,12 @@
                 :config="getLayerConfig(layer)"
               />
               
+              <!-- Path Layer -->
+              <v-path
+                v-else-if="layer.type === 'path'"
+                :config="getLayerConfig(layer)"
+              />
+              
               <!-- Image Layer - Show placeholder while loading -->
               <v-image
                 v-else-if="layer.type === 'image' && imageNodes[layer.id]"
@@ -398,6 +404,11 @@ function getLayerConfig(layer: EditorLayer) {
     baseConfig.fill = layer.fill;
     baseConfig.stroke = layer.stroke;
     baseConfig.strokeWidth = layer.strokeWidth;
+  } else if (layer.type === 'path') {
+    baseConfig.data = layer.data;
+    baseConfig.fill = layer.fill;
+    baseConfig.stroke = layer.stroke;
+    baseConfig.strokeWidth = layer.strokeWidth;
   }
 
   return baseConfig;
@@ -494,6 +505,12 @@ function handleStageMouseDown(e: any) {
       // Update radius for polygons
       if (layer.type === "polygon") {
         layer.radius = (layer.radius || 50) * node.scaleX();
+      }
+      
+      // Handle path transformation - update scale
+      if (layer.type === "path") {
+        layer.scaleX = (layer.scaleX || 1) * node.scaleX();
+        layer.scaleY = (layer.scaleY || 1) * node.scaleY();
       }
       
       // Handle text transformation - update fontSize and dimensions
