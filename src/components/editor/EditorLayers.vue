@@ -12,7 +12,7 @@
         v-for="(layer, index) in reversedLayers"
         :key="layer.id"
         draggable="true"
-        @dragstart="handleDragStart(index)"
+        @dragstart="(e) => handleDragStart(e, index)"
         @dragover="(e) => handleDragOver(e, index)"
         @dragleave="handleDragLeave"
         @drop="(e) => handleDrop(e, index)"
@@ -188,9 +188,14 @@ function getLayerIcon(type: EditorLayerType) {
 }
 
 // Drag and drop handlers
-function handleDragStart(index: number) {
+function handleDragStart(event: DragEvent, index: number) {
   draggedIndex.value = index;
   isDragging.value = true;
+  
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = "move";
+    // Set a dummy drag image for better visuals if needed, or just standard
+  }
 }
 
 function handleDragOver(event: DragEvent, index: number) {
@@ -220,13 +225,7 @@ function handleDrop(event: DragEvent, dropIndex: number) {
   // Convert visual indices (reversed) to array indices
   const totalLayers = editorStore.layers.length;
   const fromArrayIndex = totalLayers - 1 - draggedIndex.value;
-  let toArrayIndex = totalLayers - 1 - dropIndex;
-  
-  // Adjust target index when moving up in the array (from higher index to lower index)
-  // because splice removes first, shifting indices
-  if (fromArrayIndex > toArrayIndex) {
-    toArrayIndex += 1;
-  }
+  const toArrayIndex = totalLayers - 1 - dropIndex;
   
   editorStore.reorderLayer(fromArrayIndex, toArrayIndex);
   resetDragState();
