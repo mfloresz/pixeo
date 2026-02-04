@@ -171,6 +171,39 @@
         </button>
       </div>
     </div>
+
+    <div class="h-px bg-border" />
+
+    <!-- SVG Import Section -->
+    <div>
+      <h3 class="text-sm font-medium mb-3">Import SVG</h3>
+      <div class="p-4 border-2 border-dashed border-muted rounded-xl bg-muted/30 text-center">
+        <input
+          ref="svgInput"
+          type="file"
+          accept=".svg"
+          multiple
+          class="hidden"
+          @change="handleSvgUpload"
+        />
+        <button
+          @click="$refs.svgInput.click()"
+          class="w-full py-3 px-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          <span class="flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Select SVG Files
+          </span>
+        </button>
+        <p class="text-xs text-muted-foreground mt-2">
+          Import as editable group
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -386,5 +419,125 @@ function addDoubleArrow() {
   });
 
   toast.success("Double arrow added");
+}
+
+async function handleSvgUpload(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const files = input.files;
+  
+  if (!files || files.length === 0) return;
+  
+  for (const file of files) {
+    if (!file.name.endsWith('.svg')) continue;
+    
+    try {
+      const text = await file.text();
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(text, 'image/svg+xml');
+      
+      // Check for parse errors
+      const parseError = svgDoc.querySelector('parsererror');
+      if (parseError) {
+        console.warn(`Parse error in ${file.name}`);
+        continue;
+      }
+      
+      const svgElement = svgDoc.querySelector('svg');
+      if (!svgElement) continue;
+      
+      // Extract all paths and shapes from SVG
+      const children: any[] = [];
+      let childIndex = 0;
+      
+      // Extract paths
+      const paths = svgElement.querySelectorAll('path');
+      paths.forEach((path, idx) => {
+        const d = path.getAttribute('d');
+        if (d) {
+          children.push({
+            type: 'path',
+            name: `Path ${idx + 1}`,
+            data: d,
+            fill: path.getAttribute('fill') || '#3b82f6',
+            stroke: path.getAttribute('stroke') || '#1e40af',
+            strokeWidth: parseFloat(path.getAttribute('stroke-width') || '2'),
+            scaleX: 3,
+            scaleY: 3,
+          });
+        }
+      });
+      
+      // Extract circles
+      const circles = svgElement.querySelectorAll('circle');
+      circles.forEach((circle, idx) => {
+        const cx = parseFloat(circle.getAttribute('cx') || '0');
+        const cy = parseFloat(circle.getAttribute('cy') || '0');
+        const r = parseFloat(circle.getAttribute('r') || '50');
+        
+        children.push({
+          type: 'path',
+          name: `Circle ${idx + 1}`,
+          data: `M${cx},${cy-r} A${r},${r} 0 1,1 ${cx},${cy+r} A${r},${r} 0 1,1 ${cx},${cy-r} z`,
+          fill: circle.getAttribute('fill') || '#3b82f6',
+          stroke: circle.getAttribute('stroke') || '#1e40af',
+          strokeWidth: parseFloat(circle.getAttribute('stroke-width') || '2'),
+          scaleX: 1,
+          scaleY: 1,
+        });
+      });
+      
+      // Extract rectangles
+      const rects = svgElement.querySelectorAll('rect');
+      rects.forEach((rect, idx) => {
+        const x = parseFloat(rect.getAttribute('x') || '0');
+        const y = parseFloat(rect.getAttribute('y') || '0');
+        const w = parseFloat(rect.getAttribute('width') || '100');
+        const h = parseFloat(rect.getAttribute('height') || '100');
+        
+        children.push({
+          type: 'rect',
+          name: `Rect ${idx + 1}`,
+          width: w,
+          height: h,
+          fill: rect.getAttribute('fill') || '#3b82f6',
+          stroke: rect.getAttribute('stroke') || '#1e40af',
+          strokeWidth: parseFloat(rect.getAttribute('stroke-width') || '2'),
+        });
+      });
+      
+      // Extract polygons
+      const polygons = svgElement.querySelectorAll('polygon');
+      polygons.forEach((poly, idx) => {
+        const points = poly.getAttribute('points');
+        if (points) {
+          children.push({
+            type: 'path',
+            name: `Polygon ${idx + 1}`,
+            data: `M${points.trim().replace(/\s+/g, ' L')} z`,
+            fill: poly.getAttribute('fill') || '#3b82f6',
+            stroke: poly.getAttribute('stroke') || '#1e40af',
+            strokeWidth: parseFloat(poly.getAttribute('stroke-width') || '2'),
+            scaleX: 3,
+            scaleY: 3,
+          });
+        }
+      });
+      
+      if (children.length > 0) {
+        const name = file.name.replace('.svg', '').replace(/[-_]/g, ' ');
+        editorStore.addGroup(name, children);
+        toast.success(`Imported "${name}" with ${children.length} elements`);
+      } else {
+        toast.error(`No elements found in ${file.name}`);
+      }
+      
+    } catch (error) {
+      console.error(`Error processing ${file.name}:`, error);
+      toast.error(`Failed to import ${file.name}`);
+    }
+  }
+  
+  // Reset input
+  input.value = '';
 }
 </script>

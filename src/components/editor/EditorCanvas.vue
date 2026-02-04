@@ -98,6 +98,65 @@
                 :config="getLayerConfig(layer)"
               />
               
+              <!-- Group Layer -->
+              <v-group
+                v-else-if="layer.type === 'group' && layer.children"
+                :config="getGroupConfig(layer)"
+                @mousedown="handleGroupMouseDown($event, layer)"
+                @touchstart="handleGroupMouseDown($event, layer)"
+                @dblclick="handleGroupDblClick($event, layer)"
+              >
+                <!-- Invisible hit rect to capture clicks on empty space within group -->
+                <v-rect
+                  :config="getGroupHitRectConfig(layer)"
+                />
+                
+                <template v-for="child in layer.children" :key="child.id">
+                  <v-rect
+                    v-if="child.type === 'rect'"
+                    :config="getGroupChildConfig(child, layer)"
+                    @mousedown="handleGroupChildMouseDown($event, layer, child)"
+                    @touchstart="handleGroupChildMouseDown($event, layer, child)"
+                  />
+                  <v-circle
+                    v-else-if="child.type === 'circle'"
+                    :config="getGroupChildConfig(child, layer)"
+                    @mousedown="handleGroupChildMouseDown($event, layer, child)"
+                    @touchstart="handleGroupChildMouseDown($event, layer, child)"
+                  />
+                  <v-ellipse
+                    v-else-if="child.type === 'ellipse'"
+                    :config="getGroupChildConfig(child, layer)"
+                    @mousedown="handleGroupChildMouseDown($event, layer, child)"
+                    @touchstart="handleGroupChildMouseDown($event, layer, child)"
+                  />
+                  <v-regular-polygon
+                    v-else-if="child.type === 'polygon'"
+                    :config="getGroupChildConfig(child, layer)"
+                    @mousedown="handleGroupChildMouseDown($event, layer, child)"
+                    @touchstart="handleGroupChildMouseDown($event, layer, child)"
+                  />
+                  <v-star
+                    v-else-if="child.type === 'star'"
+                    :config="getGroupChildConfig(child, layer)"
+                    @mousedown="handleGroupChildMouseDown($event, layer, child)"
+                    @touchstart="handleGroupChildMouseDown($event, layer, child)"
+                  />
+                  <v-path
+                    v-else-if="child.type === 'path'"
+                    :config="getGroupChildConfig(child, layer)"
+                    @mousedown="handleGroupChildMouseDown($event, layer, child)"
+                    @touchstart="handleGroupChildMouseDown($event, layer, child)"
+                  />
+                  <v-text
+                    v-else-if="child.type === 'text'"
+                    :config="getGroupChildConfig(child, layer)"
+                    @mousedown="handleGroupChildMouseDown($event, layer, child)"
+                    @touchstart="handleGroupChildMouseDown($event, layer, child)"
+                  />
+                </template>
+              </v-group>
+              
               <!-- Image Layer - Show placeholder while loading -->
               <v-image
                 v-else-if="layer.type === 'image' && imageNodes[layer.id]"
@@ -184,6 +243,10 @@ const backgroundImageNode = ref<HTMLImageElement | null>(null);
 let currentSelectedNode: Konva.Node | null = null;
 let isProcessing = false;
 
+// Group editing state
+const editingGroupId = ref<string | null>(null);
+const editingChildId = ref<string | null>(null);
+
 // Text editing
 const editingText = ref(false);
 const editingTextValue = ref("");
@@ -216,6 +279,9 @@ const transformerStaticConfig = {
   borderStroke: '#3b82f6',
   anchorStroke: '#3b82f6',
   anchorFill: '#ffffff',
+  // Keep relative transform for groups
+  keepRatio: false,
+  centeredScaling: false,
 };
 
 // Canvas container style
@@ -414,6 +480,222 @@ function getLayerConfig(layer: EditorLayer) {
   return baseConfig;
 }
 
+function getGroupConfig(layer: EditorLayer) {
+  const isEditing = editingGroupId.value === layer.id;
+  
+  return {
+    id: layer.id,
+    x: layer.x,
+    y: layer.y,
+    rotation: layer.rotation,
+    scaleX: layer.scaleX,
+    scaleY: layer.scaleY,
+    opacity: layer.opacity,
+    draggable: layer.draggable && !layer.locked && !isEditing,
+    listening: true,
+  };
+}
+
+function getGroupHitRectConfig(layer: EditorLayer) {
+  // Calculate bounding box of all children to create hit area
+  let minX = 0, minY = 0, maxX = 0, maxY = 0;
+  let hasChildren = false;
+  
+  if (layer.children && layer.children.length > 0) {
+    hasChildren = true;
+    minX = Infinity; 
+    minY = Infinity; 
+    maxX = -Infinity; 
+    maxY = -Infinity;
+    
+    layer.children.forEach(child => {
+      let childWidth = 100, childHeight = 100, childX = 0, childY = 0;
+      
+      if (child.type === 'rect') {
+        childWidth = child.width || 100;
+        childHeight = child.height || 100;
+        childX = child.x || 0;
+        childY = child.y || 0;
+      } else if (child.type === 'circle') {
+        childWidth = (child.radius || 50) * 2;
+        childHeight = (child.radius || 50) * 2;
+      } else if (child.type === 'polygon' || child.type === 'star') {
+        const r = child.radius || child.outerRadius || 60;
+        childWidth = r * 2;
+        childHeight = r * 2;
+      } else if (child.type === 'path' && child.scaleX) {
+        // Estimate size from scale (assuming 24x24 viewBox)
+        childWidth = 24 * child.scaleX;
+        childHeight = 24 * child.scaleY;
+        childX = (child.offsetX || 0) + childWidth / 2;
+        childY = (child.offsetY || 0) + childHeight / 2;
+      }
+      
+      minX = Math.min(minX, childX - childWidth / 2);
+      minY = Math.min(minY, childY - childHeight / 2);
+      maxX = Math.max(maxX, childX + childWidth / 2);
+      maxY = Math.max(maxY, childY + childHeight / 2);
+    });
+  }
+  
+  // Add padding
+  const padding = 20;
+  let width, height;
+  
+  if (hasChildren) {
+    width = maxX - minX + padding * 2;
+    height = maxY - minY + padding * 2;
+  } else {
+    // Default size if no children
+    width = 200;
+    height = 200;
+    minX = -100;
+    minY = -100;
+  }
+  
+  return {
+    x: minX - padding,
+    y: minY - padding,
+    width: width,
+    height: height,
+    fill: 'transparent',
+    stroke: editingGroupId.value === layer.id ? '#3b82f6' : 'transparent',
+    strokeWidth: 1,
+    listening: true,
+    perfectDrawEnabled: false,
+    shadowEnabled: false,
+  };
+}
+
+function getGroupChildConfig(child: any, parent: EditorLayer) {
+  const isEditing = editingGroupId.value === parent.id;
+  
+  const baseConfig: any = {
+    id: child.id,
+    fill: child.fill,
+    stroke: child.stroke,
+    strokeWidth: child.strokeWidth,
+    draggable: isEditing,
+    listening: isEditing,
+  };
+
+  if (child.type === 'rect') {
+    baseConfig.x = child.x || 0;
+    baseConfig.y = child.y || 0;
+    baseConfig.width = child.width;
+    baseConfig.height = child.height;
+  } else if (child.type === 'circle') {
+    baseConfig.radius = child.radius;
+  } else if (child.type === 'ellipse') {
+    baseConfig.radiusX = child.radiusX;
+    baseConfig.radiusY = child.radiusY;
+  } else if (child.type === 'polygon') {
+    baseConfig.sides = child.sides;
+    baseConfig.radius = child.radius;
+  } else if (child.type === 'star') {
+    baseConfig.numPoints = child.numPoints;
+    baseConfig.innerRadius = child.innerRadius;
+    baseConfig.outerRadius = child.outerRadius;
+  } else if (child.type === 'path') {
+    baseConfig.data = child.data;
+    baseConfig.scaleX = child.scaleX || 1;
+    baseConfig.scaleY = child.scaleY || 1;
+    baseConfig.x = child.offsetX || 0;
+    baseConfig.y = child.offsetY || 0;
+  } else if (child.type === 'text') {
+    baseConfig.text = child.text;
+    baseConfig.fontSize = child.fontSize;
+    baseConfig.fontFamily = child.fontFamily;
+  }
+
+  return baseConfig;
+}
+
+function handleGroupMouseDown(e: any, layer: EditorLayer) {
+  // Only select if we're not already editing this group
+  if (editingGroupId.value !== layer.id) {
+    e.cancelBubble = true;
+    editorStore.selectLayer(layer.id);
+    
+    const node = e.target as Konva.Node;
+    
+    // Check if we clicked on the hit rect (empty space) or the group itself
+    if (node.getClassName() === 'Rect' && node.fill() === 'transparent') {
+      // Clicked on empty space within group - select the group
+      currentSelectedNode = node.getParent() as Konva.Node;
+    } else {
+      currentSelectedNode = node;
+    }
+    
+    updateTransformer();
+    
+    // Setup drag handlers for the group
+    if (currentSelectedNode) {
+      currentSelectedNode.off('dragend');
+      currentSelectedNode.off('transformend');
+      
+      currentSelectedNode.on('dragend', () => {
+        const groupLayer = editorStore.layers.find(l => l.id === layer.id);
+        if (groupLayer && groupLayer.type === 'group') {
+          groupLayer.x = currentSelectedNode!.x();
+          groupLayer.y = currentSelectedNode!.y();
+        }
+      });
+      
+      currentSelectedNode.on('transformend', () => {
+        const groupLayer = editorStore.layers.find(l => l.id === layer.id);
+        if (groupLayer && groupLayer.type === 'group') {
+          groupLayer.x = currentSelectedNode!.x();
+          groupLayer.y = currentSelectedNode!.y();
+          groupLayer.rotation = currentSelectedNode!.rotation();
+          groupLayer.scaleX = currentSelectedNode!.scaleX();
+          groupLayer.scaleY = currentSelectedNode!.scaleY();
+        }
+      });
+    }
+  }
+}
+
+function handleGroupDblClick(e: any, layer: EditorLayer) {
+  e.cancelBubble = true;
+  
+  if (editingGroupId.value === layer.id) {
+    // Exit edit mode
+    editingGroupId.value = null;
+    editingChildId.value = null;
+    editorStore.toggleGroupEdit(layer.id);
+  } else {
+    // Enter edit mode
+    editingGroupId.value = layer.id;
+    editorStore.toggleGroupEdit(layer.id);
+  }
+  
+  // Re-render to update listening states
+  nextTick(() => {
+    const stage = stageRef.value?.getStage() as Konva.Stage;
+    if (stage) {
+      stage.batchDraw();
+    }
+  });
+}
+
+function handleGroupChildMouseDown(e: any, layer: EditorLayer, child: any) {
+  if (editingGroupId.value === layer.id) {
+    // In edit mode - select the child
+    e.cancelBubble = true;
+    editingChildId.value = child.id;
+    editorStore.selectGroupChild(layer.id, child.id);
+    
+    // Select the node for transformer
+    const node = e.target as Konva.Node;
+    currentSelectedNode = node;
+    updateTransformer();
+  } else {
+    // Not in edit mode - treat as group click
+    handleGroupMouseDown(e, layer);
+  }
+}
+
 function getImageLayerConfig(layer: EditorLayer) {
   const img = imageNodes.value[layer.id];
   const width = layer.width || img?.naturalWidth || img?.width || 100;
@@ -439,94 +721,148 @@ function getImageLayerConfig(layer: EditorLayer) {
 function handleStageMouseDown(e: any) {
   // Clicked on stage (not on a layer) - deselect
   if (e.target === e.target.getStage()) {
+    // If we're editing a group, exit edit mode
+    if (editingGroupId.value) {
+      editingGroupId.value = null;
+      editingChildId.value = null;
+    }
     editorStore.selectLayer(null);
     currentSelectedNode = null;
     updateTransformer();
     return;
   }
   
-  // Clicked on a layer - select it
-  const clickedLayer = editorStore.layers.find(l => l.id === e.target.id());
+  // Get the clicked node and find its layer ID
+  const clickedNode = e.target as Konva.Node;
+  let clickedId = clickedNode.id();
+  
+  // Check if we clicked on a group or element inside a group
+  let parentGroup = editorStore.layers.find(l => 
+    l.type === 'group' && l.children?.some(c => c.id === clickedId)
+  );
+  
+  // Also check if the clicked element IS a group
+  const clickedLayer = editorStore.layers.find(l => l.id === clickedId);
+  if (clickedLayer && clickedLayer.type === 'group') {
+    parentGroup = clickedLayer;
+  }
+  
+  // Check if clicked node is inside a group (check parent)
+  let parent = clickedNode.getParent();
+  while (parent && !parentGroup) {
+    const parentId = parent.id();
+    const groupLayer = editorStore.layers.find(l => l.id === parentId && l.type === 'group');
+    if (groupLayer) {
+      parentGroup = groupLayer;
+      clickedId = parentId;
+      break;
+    }
+    parent = parent.getParent();
+  }
+  
+  if (parentGroup) {
+    if (editingGroupId.value === parentGroup.id) {
+      // We're in group edit mode - let the child handler manage this
+      return;
+    } else {
+      // Not in edit mode - select the group
+      // This will be handled by the group's mousedown handler
+      return;
+    }
+  }
+  
+  // Clicked on a regular layer (not a group) - select it
   if (clickedLayer) {
     editorStore.selectLayer(clickedLayer.id);
     
+    // If clicking on a non-group while editing a group, exit edit mode
+    if (editingGroupId.value) {
+      editingGroupId.value = null;
+      editingChildId.value = null;
+    }
+    
     // Setup drag and transform handlers for this node
-    const node = e.target as Konva.Node;
-    currentSelectedNode = node;
+    currentSelectedNode = clickedNode;
     updateTransformer();
     
     // Remove previous handlers to avoid duplicates
-    node.off('dragend');
-    node.off('transformend');
+    clickedNode.off('dragend');
+    clickedNode.off('transformend');
     
     // Handle drag end
-    node.on('dragend', () => {
-      const layer = editorStore.layers.find(l => l.id === node.id());
+    clickedNode.on('dragend', () => {
+      const layer = editorStore.layers.find(l => l.id === clickedNode.id());
       if (layer) {
-        // Update store without triggering full re-render
-        layer.x = node.x();
-        layer.y = node.y();
+        layer.x = clickedNode.x();
+        layer.y = clickedNode.y();
       }
     });
     
     // Handle transform end
-    node.on('transformend', () => {
-      const layer = editorStore.layers.find(l => l.id === node.id());
+    clickedNode.on('transformend', () => {
+      const layer = editorStore.layers.find(l => l.id === clickedNode.id());
       if (!layer) return;
       
       // Update position and rotation
-      layer.x = node.x();
-      layer.y = node.y();
-      layer.rotation = node.rotation();
+      layer.x = clickedNode.x();
+      layer.y = clickedNode.y();
+      layer.rotation = clickedNode.rotation();
       
-      // Update size for rects and images
-      if (layer.type === "rect" || layer.type === "image") {
-        layer.width = (layer.width || 100) * node.scaleX();
-        layer.height = (layer.height || 100) * node.scaleY();
-      }
-      
-      // Update radius for circles
-      if (layer.type === "circle") {
-        layer.radius = (layer.radius || 50) * node.scaleX();
-      }
-      
-      // Update radii for ellipses
-      if (layer.type === "ellipse") {
-        layer.radiusX = (layer.radiusX || 60) * node.scaleX();
-        layer.radiusY = (layer.radiusY || 40) * node.scaleY();
-      }
-      
-      // Update radii for stars
-      if (layer.type === "star") {
-        layer.innerRadius = (layer.innerRadius || 30) * node.scaleX();
-        layer.outerRadius = (layer.outerRadius || 60) * node.scaleX();
-      }
-      
-      // Update radius for polygons
-      if (layer.type === "polygon") {
-        layer.radius = (layer.radius || 50) * node.scaleX();
-      }
-      
-      // Handle path transformation - update scale
-      if (layer.type === "path") {
-        layer.scaleX = (layer.scaleX || 1) * node.scaleX();
-        layer.scaleY = (layer.scaleY || 1) * node.scaleY();
-      }
-      
-      // Handle text transformation - update fontSize and dimensions
-      if (layer.type === "text") {
-        layer.fontSize = (layer.fontSize || 24) * node.scaleX();
-        if (layer.width) {
-          layer.width = layer.width * node.scaleX();
+      // For non-group layers, apply size changes
+      if (layer.type !== 'group') {
+        // Update size for rects and images
+        if (layer.type === "rect" || layer.type === "image") {
+          layer.width = (layer.width || 100) * clickedNode.scaleX();
+          layer.height = (layer.height || 100) * clickedNode.scaleY();
         }
-        if (layer.height) {
-          layer.height = layer.height * node.scaleY();
+        
+        // Update radius for circles
+        if (layer.type === "circle") {
+          layer.radius = (layer.radius || 50) * clickedNode.scaleX();
         }
+        
+        // Update radii for ellipses
+        if (layer.type === "ellipse") {
+          layer.radiusX = (layer.radiusX || 60) * clickedNode.scaleX();
+          layer.radiusY = (layer.radiusY || 40) * clickedNode.scaleY();
+        }
+        
+        // Update radii for stars
+        if (layer.type === "star") {
+          layer.innerRadius = (layer.innerRadius || 30) * clickedNode.scaleX();
+          layer.outerRadius = (layer.outerRadius || 60) * clickedNode.scaleX();
+        }
+        
+        // Update radius for polygons
+        if (layer.type === "polygon") {
+          layer.radius = (layer.radius || 50) * clickedNode.scaleX();
+        }
+        
+        // Handle path transformation - update scale
+        if (layer.type === "path") {
+          layer.scaleX = (layer.scaleX || 1) * clickedNode.scaleX();
+          layer.scaleY = (layer.scaleY || 1) * clickedNode.scaleY();
+        }
+        
+        // Handle text transformation - update fontSize and dimensions
+        if (layer.type === "text") {
+          layer.fontSize = (layer.fontSize || 24) * clickedNode.scaleX();
+          if (layer.width) {
+            layer.width = layer.width * clickedNode.scaleX();
+          }
+          if (layer.height) {
+            layer.height = layer.height * clickedNode.scaleY();
+          }
+        }
+        
+        // Reset node scale
+        clickedNode.scaleX(1);
+        clickedNode.scaleY(1);
+      } else {
+        // For groups, keep the scale
+        layer.scaleX = clickedNode.scaleX();
+        layer.scaleY = clickedNode.scaleY();
       }
-      
-      // Reset node scale
-      node.scaleX(1);
-      node.scaleY(1);
     });
   }
 }

@@ -9,7 +9,37 @@ export type HistoryItem = {
 };
 
 // Editor Types
-export type EditorLayerType = "text" | "image" | "rect" | "circle" | "ellipse" | "line" | "star" | "arrow" | "polygon" | "path";
+export type EditorLayerType = "text" | "image" | "rect" | "circle" | "ellipse" | "line" | "star" | "arrow" | "polygon" | "path" | "group";
+
+export interface GroupChild {
+  id: string;
+  type: Exclude<EditorLayerType, "group" | "image">;
+  name: string;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  // Shape specific properties
+  width?: number;
+  height?: number;
+  radius?: number;
+  radiusX?: number;
+  radiusY?: number;
+  sides?: number;
+  points?: number[];
+  numPoints?: number;
+  innerRadius?: number;
+  outerRadius?: number;
+  pointerLength?: number;
+  pointerWidth?: number;
+  pointerAtBeginning?: boolean;
+  pointerAtEnding?: boolean;
+  dash?: number[];
+  closed?: boolean;
+  data?: string;
+  text?: string;
+  fontSize?: number;
+  fontFamily?: string;
+}
 
 export interface EditorLayer {
   id: string;
@@ -54,6 +84,10 @@ export interface EditorLayer {
   src?: string;
   // Path specific
   data?: string;
+  // Group specific
+  children?: GroupChild[];
+  isGroupOpen?: boolean; // For tracking if group is expanded in UI
+  editingChildId?: string | null; // Track which child is being edited
   // Common
   draggable: boolean;
 }

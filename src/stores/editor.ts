@@ -176,6 +176,10 @@ export const useEditorStore = defineStore("editor", () => {
       baseLayer.radius = config?.radius || 50;
     } else if (type === "path") {
       baseLayer.data = config?.data || "";
+    } else if (type === "group") {
+      baseLayer.children = config?.children || [];
+      baseLayer.isGroupOpen = false;
+      baseLayer.editingChildId = null;
     }
     
     saveToHistory();
@@ -378,6 +382,127 @@ export const useEditorStore = defineStore("editor", () => {
     }
   }
   
+  // Group management functions
+  function addGroup(name: string, children: any[]) {
+    const id = `layer-${Date.now()}-${layerCounter.value++}`;
+    const groupName = name || `Group ${layerCounter.value - 1}`;
+    
+    const groupLayer: EditorLayer = {
+      id,
+      type: "group",
+      name: groupName,
+      visible: true,
+      locked: false,
+      x: canvasWidth.value / 2,
+      y: canvasHeight.value / 2,
+      rotation: 0,
+      scaleX: 1,
+      scaleY: 1,
+      opacity: 1,
+      draggable: true,
+      fill: "#3b82f6",
+      children: children.map((child, index) => ({
+        id: `${id}-child-${index}`,
+        ...child,
+      })),
+      isGroupOpen: false,
+      editingChildId: null,
+    };
+    
+    saveToHistory();
+    layers.value.push(groupLayer);
+    selectedLayerId.value = id;
+    
+    return id;
+  }
+  
+  function toggleGroupEdit(layerId: string) {
+    const layer = layers.value.find(l => l.id === layerId);
+    if (layer && layer.type === "group") {
+      layer.isGroupOpen = !layer.isGroupOpen;
+      if (!layer.isGroupOpen) {
+        layer.editingChildId = null;
+      }
+    }
+  }
+  
+  function selectGroupChild(layerId: string, childId: string | null) {
+    const layer = layers.value.find(l => l.id === layerId);
+    if (layer && layer.type === "group") {
+      layer.editingChildId = childId;
+    }
+  }
+  
+  function updateGroupChild(layerId: string, childId: string, updates: any, saveHistoryFlag: boolean = false) {
+    const layer = layers.value.find(l => l.id === layerId);
+    if (layer && layer.type === "group" && layer.children) {
+      const child = layer.children.find(c => c.id === childId);
+      if (child) {
+        Object.assign(child, updates);
+        if (saveHistoryFlag) {
+          saveToHistory();
+        }
+      }
+    }
+  }
+  
+  function ungroup(layerId: string) {
+    const layerIndex = layers.value.findIndex(l => l.id === layerId);
+    if (layerIndex === -1) return;
+    
+    const layer = layers.value[layerIndex];
+    if (layer.type !== "group" || !layer.children) return;
+    
+    saveToHistory();
+    
+    // Remove the group
+    layers.value.splice(layerIndex, 1);
+    
+    // Add children as individual layers at the group's position
+    layer.children.forEach((child, index) => {
+      const childLayer: EditorLayer = {
+        id: `layer-${Date.now()}-${layerCounter.value++}-${index}`,
+        type: child.type,
+        name: child.name,
+        visible: true,
+        locked: false,
+        x: layer.x,
+        y: layer.y,
+        rotation: layer.rotation,
+        scaleX: layer.scaleX || 1,
+        scaleY: layer.scaleY || 1,
+        opacity: layer.opacity,
+        draggable: true,
+        fill: child.fill,
+        stroke: child.stroke,
+        strokeWidth: child.strokeWidth,
+        width: child.width,
+        height: child.height,
+        radius: child.radius,
+        radiusX: child.radiusX,
+        radiusY: child.radiusY,
+        sides: child.sides,
+        points: child.points,
+        numPoints: child.numPoints,
+        innerRadius: child.innerRadius,
+        outerRadius: child.outerRadius,
+        pointerLength: child.pointerLength,
+        pointerWidth: child.pointerWidth,
+        pointerAtBeginning: child.pointerAtBeginning,
+        pointerAtEnding: child.pointerAtEnding,
+        dash: child.dash,
+        closed: child.closed,
+        data: child.data,
+        text: child.text,
+        fontSize: child.fontSize,
+        fontFamily: child.fontFamily,
+      };
+      layers.value.splice(layerIndex + index, 0, childLayer);
+    });
+    
+    selectedLayerId.value = null;
+  }
+  
   return {
     // State
     canvasWidth,
@@ -430,5 +555,10 @@ export const useEditorStore = defineStore("editor", () => {
     openSidebar,
     closeSidebar,
     toggleTool,
+    addGroup,
+    toggleGroupEdit,
+    selectGroupChild,
+    updateGroupChild,
+    ungroup,
   };
 });
