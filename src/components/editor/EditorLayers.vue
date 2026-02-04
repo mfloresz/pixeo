@@ -11,12 +11,28 @@
       <div
         v-for="(layer, index) in reversedLayers"
         :key="layer.id"
+        draggable="true"
+        @dragstart="handleDragStart(index)"
+        @dragover="(e) => handleDragOver(e, index)"
+        @dragleave="handleDragLeave"
+        @drop="(e) => handleDrop(e, index)"
+        @dragend="handleDragEnd"
         @click="editorStore.selectLayer(layer.id)"
         :class="[
-          'flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all',
-          editorStore.selectedLayerId === layer.id ? 'bg-primary/10 border border-primary/30' : 'hover:bg-muted/50 border border-transparent'
+          'flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all group',
+          editorStore.selectedLayerId === layer.id ? 'bg-primary/10 border border-primary/30' : 'hover:bg-muted/50 border border-transparent',
+          draggedIndex === index ? 'opacity-50' : '',
+          dragOverIndex === index && dragOverIndex !== draggedIndex ? 'border-t-2 border-t-primary' : ''
         ]"
       >
+        <!-- Drag Handle -->
+        <div 
+          class="p-1 rounded cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+          title="Drag to reorder"
+        >
+          <GripVertical class="w-4 h-4" />
+        </div>
+        
         <!-- Visibility Toggle -->
         <button
           @click.stop="editorStore.toggleLayerVisibility(layer.id)"
@@ -111,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import {
   Eye,
   EyeOff,
@@ -133,6 +149,7 @@ import {
   ArrowDownToLine,
   Trash2,
   Layers,
+  GripVertical,
 } from "lucide-vue-next";
 import { useEditorStore } from "../../stores/editor";
 import type { EditorLayerType } from "../../types";
@@ -150,6 +167,11 @@ const reversedLayers = computed(() => {
   return [...editorStore.layers].reverse();
 });
 
+// Drag and drop state
+const draggedIndex = ref<number | null>(null);
+const dragOverIndex = ref<number | null>(null);
+const isDragging = ref(false);
+
 function getLayerIcon(type: EditorLayerType) {
   switch (type) {
     case "text": return Type;
@@ -164,4 +186,75 @@ function getLayerIcon(type: EditorLayerType) {
     default: return Square;
   }
 }
+
+// Drag and drop handlers
+function handleDragStart(index: number) {
+  draggedIndex.value = index;
+  isDragging.value = true;
+}
+
+function handleDragOver(event: DragEvent, index: number) {
+  event.preventDefault();
+  if (draggedIndex.value === null) return;
+  if (draggedIndex.value === index) return;
+  dragOverIndex.value = index;
+}
+
+function handleDragLeave(event: DragEvent) {
+  // Only clear if we're leaving the layer item, not entering a child
+  const target = event.target as HTMLElement;
+  const relatedTarget = event.relatedTarget as HTMLElement;
+  if (!target.contains(relatedTarget)) {
+    dragOverIndex.value = null;
+  }
+}
+
+function handleDrop(event: DragEvent, dropIndex: number) {
+  event.preventDefault();
+  if (draggedIndex.value === null) return;
+  if (draggedIndex.value === dropIndex) {
+    resetDragState();
+    return;
+  }
+  
+  // Convert visual indices (reversed) to array indices
+  const totalLayers = editorStore.layers.length;
+  const fromArrayIndex = totalLayers - 1 - draggedIndex.value;
+  let toArrayIndex = totalLayers - 1 - dropIndex;
+  
+  // Adjust target index when moving up in the array (from higher index to lower index)
+  // because splice removes first, shifting indices
+  if (fromArrayIndex > toArrayIndex) {
+    toArrayIndex += 1;
+  }
+  
+  editorStore.reorderLayer(fromArrayIndex, toArrayIndex);
+  resetDragState();
+}
+
+function handleDragEnd() {
+  resetDragState();
+}
+
+function resetDragState() {
+  draggedIndex.value = null;
+  dragOverIndex.value = null;
+  isDragging.value = false;
+}
 </script>
+
+<style scoped>
+/* Drag and drop styles */
+.cursor-grab {
+  cursor: grab;
+}
+
+.cursor-grabbing {
+  cursor: grabbing;
+}
+
+/* Smooth transitions for layer items */
+.border-t-2 {
+  transition: all 0.1s ease;
+}
+</style>

@@ -232,6 +232,16 @@ export const useEditorStore = defineStore("editor", () => {
     }
   }
   
+  function reorderLayer(fromIndex: number, toIndex: number) {
+    saveToHistory();
+    if (fromIndex < 0 || fromIndex >= layers.value.length) return;
+    if (toIndex < 0 || toIndex >= layers.value.length) return;
+    if (fromIndex === toIndex) return;
+    
+    const [layer] = layers.value.splice(fromIndex, 1);
+    layers.value.splice(toIndex, 0, layer);
+  }
+  
   function toggleLayerVisibility(id: string) {
     const layer = layers.value.find(l => l.id === id);
     if (layer) {
@@ -401,6 +411,7 @@ export const useEditorStore = defineStore("editor", () => {
     deleteLayer,
     selectLayer,
     moveLayer,
+    reorderLayer,
     toggleLayerVisibility,
     toggleLayerLock,
     duplicateLayer,
