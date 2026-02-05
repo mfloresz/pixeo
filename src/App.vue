@@ -190,9 +190,10 @@
                 :show="showZoom"
                 :item="selectedZoomItem"
                 :blobUrl="selectedZoomBlobUrl"
+                :thumbnailUrl="selectedZoomThumbnailUrl"
                 @close="closeZoom"
                 @download="
-                    downloadItem(selectedZoomBlobUrl, selectedZoomItem?.id)
+                    downloadItem(selectedZoomThumbnailUrl || selectedZoomBlobUrl, selectedZoomItem?.id)
                 "
                 @edit="handleEdit"
                 @enhance="handleEnhance"
@@ -216,6 +217,7 @@ import Toaster from "./components/ui/Toaster.vue";
 import { useConfigStore } from "./stores/config";
 import { useHistoryStore } from "./stores/history";
 import { useModelsStore } from "./stores/models";
+import { useEditorStore } from "./stores/editor";
 import type { HistoryItem } from "./types";
 import PromptInput from "./components/generate/PromptInput.vue";
 import SettingsView from "./components/settings/SettingsView.vue";
@@ -302,6 +304,7 @@ const activeTab = ref("generate");
 const showZoom = ref(false);
 const selectedZoomItem = ref<HistoryItem | null>(null);
 const selectedZoomBlobUrl = ref<string | null>(null);
+const selectedZoomThumbnailUrl = ref<string | null>(null);
 
 async function openZoom(item: HistoryItem) {
     selectedZoomItem.value = item;
@@ -314,6 +317,18 @@ async function openZoom(item: HistoryItem) {
     if (blob) {
         selectedZoomBlobUrl.value = URL.createObjectURL(blob);
     }
+
+    // For editor projects, get the thumbnail
+    if (selectedZoomThumbnailUrl.value)
+        URL.revokeObjectURL(selectedZoomThumbnailUrl.value);
+    selectedZoomThumbnailUrl.value = null;
+    
+    if (item.mode === "editor-project") {
+        const thumbBlob = await historyStore.getThumbnail(item.id);
+        if (thumbBlob) {
+            selectedZoomThumbnailUrl.value = URL.createObjectURL(thumbBlob);
+        }
+    }
 }
 
 function closeZoom() {
@@ -322,6 +337,10 @@ function closeZoom() {
     if (selectedZoomBlobUrl.value) {
         URL.revokeObjectURL(selectedZoomBlobUrl.value);
         selectedZoomBlobUrl.value = null;
+    }
+    if (selectedZoomThumbnailUrl.value) {
+        URL.revokeObjectURL(selectedZoomThumbnailUrl.value);
+        selectedZoomThumbnailUrl.value = null;
     }
     selectedZoomItem.value = null;
 }
@@ -345,6 +364,51 @@ function downloadItem(blobUrl: string | null, id?: string) {
 
 
 async function handleEdit(item: HistoryItem, blobUrl: string | null) {
+    // Check if this is an editor project
+    if (item.mode === "editor-project") {
+        // Get the project blob
+        let blob: Blob | null = null;
+        if (blobUrl) {
+            try {
+                const response = await fetch(blobUrl);
+                blob = await response.blob();
+            } catch (e) {
+                console.error("Failed to fetch blobUrl", e);
+            }
+        }
+
+        if (!blob) {
+            blob = await historyStore.getBlob(item.id);
+        }
+
+        if (!blob) {
+            toast.error("No se pudo cargar el proyecto");
+            return;
+        }
+
+        try {
+            // Read the project data
+            const projectJson = await blob.text();
+            const project = JSON.parse(projectJson);
+
+            // Load the project in the editor store
+            const editorStore = useEditorStore();
+            editorStore.loadProject(project);
+
+            // Switch to editor tab
+            activeTab.value = "editor";
+
+            // Close zoom modal
+            closeZoom();
+
+            toast.success(`Proyecto "${project.name}" cargado en el editor`);
+        } catch (error) {
+            console.error("Failed to load editor project:", error);
+            toast.error("Error al cargar el proyecto");
+        }
+        return;
+    }
+
     // Set mode to image‑edit and select the correct model
     modelsStore.mode = "image-edit";
     await nextTick();

@@ -226,7 +226,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import { toast } from "vue-sonner";
 import { Undo2, Redo2, Download, Save, LayoutTemplate, Type, Image as ImageIcon, Square, Circle, Minus, ArrowRight, Star, Triangle, ZoomIn, ZoomOut, Minimize } from "lucide-vue-next";
 import { useEditorStore } from "../../stores/editor";
@@ -240,6 +240,31 @@ import { CommonProperties, TextProperties, ShapeProperties, LineProperties, Imag
 
 const editorStore = useEditorStore();
 const canvasRef = ref<InstanceType<typeof EditorCanvas> | null>(null);
+
+// Watch for changes to mark as unsaved
+watch(() => editorStore.layers, () => {
+  editorStore.markAsChanged();
+}, { deep: true });
+
+watch(() => editorStore.projectName, () => {
+  editorStore.markAsChanged();
+});
+
+// Auto-save setup
+onMounted(() => {
+  editorStore.startAutoSave(async () => {
+    if (canvasRef.value) {
+      const thumbnailDataUrl = canvasRef.value.generateThumbnailDataUrl();
+      await editorStore.saveToLibrary(thumbnailDataUrl || undefined);
+    } else {
+      await editorStore.saveToLibrary();
+    }
+  });
+});
+
+onUnmounted(() => {
+  editorStore.stopAutoSave();
+});
 
 const showTemplates = ref(false);
 const showExportModal = ref(false);
@@ -306,7 +331,9 @@ async function confirmExport() {
 
 async function saveProject() {
   try {
-    const id = await editorStore.saveToLibrary();
+    // Generate thumbnail before saving
+    const thumbnailDataUrl = canvasRef.value?.generateThumbnailDataUrl();
+    const id = await editorStore.saveToLibrary(thumbnailDataUrl || undefined);
     toast.success("Project saved to library");
   } catch (error) {
     toast.error("Failed to save project");

@@ -912,7 +912,7 @@ function exportToImage(format: "png" | "jpg" | "webp" = "png", quality: number =
   }
   
   const dataUrl = stage.toDataURL({
-    pixelRatio: 2,
+    pixelRatio: 1,
     mimeType: format === "jpg" ? "image/jpeg" : `image/${format}`,
     quality,
   });
@@ -925,10 +925,50 @@ function exportToImage(format: "png" | "jpg" | "webp" = "png", quality: number =
   return dataUrl;
 }
 
+// Generate thumbnail data URL for library
+function generateThumbnailDataUrl(): string | null {
+  if (!stageRef.value) return null;
+  
+  const stage = stageRef.value.getStage() as Konva.Stage;
+  
+  // Check if stage has valid dimensions
+  if (!stage.width() || !stage.height()) {
+    console.warn("Stage has invalid dimensions for thumbnail generation");
+    return null;
+  }
+  
+  // Hide transformer before capturing
+  const transformer = stage.findOne("Transformer") as Konva.Transformer;
+  if (transformer) {
+    transformer.hide();
+    stage.batchDraw();
+  }
+  
+  try {
+    const dataUrl = stage.toDataURL({
+      pixelRatio: 0.5, // Lower resolution for thumbnail
+      mimeType: 'image/webp',
+      quality: 0.8,
+    });
+    
+    return dataUrl;
+  } catch (error) {
+    console.error("Failed to generate thumbnail:", error);
+    return null;
+  } finally {
+    // Show transformer again
+    if (transformer) {
+      transformer.show();
+      stage.batchDraw();
+    }
+  }
+}
+
 // Expose export function and scroll container to parent
 defineExpose({
   exportToImage,
   scrollContainerRef,
+  generateThumbnailDataUrl,
 });
 </script>
 

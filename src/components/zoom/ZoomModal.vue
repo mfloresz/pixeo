@@ -21,7 +21,7 @@
                 >
                     <img
                         v-if="item.type === 'image'"
-                        :src="blobUrl || undefined"
+                        :src="item.mode === 'editor-project' ? (thumbnailUrl || undefined) : (blobUrl || undefined)"
                         class="max-w-full max-h-full object-contain shadow-2xl rounded-lg"
                     />
                     <video
@@ -159,6 +159,7 @@ const props = defineProps({
     show: { type: Boolean, required: true },
     item: { type: Object as PropType<HistoryItem | null>, default: null },
     blobUrl: { type: String as PropType<string | null>, default: null },
+    thumbnailUrl: { type: String as PropType<string | null>, default: null },
 });
 
 const emit = defineEmits({

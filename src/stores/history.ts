@@ -160,7 +160,12 @@ export const useHistoryStore = defineStore("history", () => {
     sessionItems.value.unshift(fullItem);
   }
 
-  async function addEditorProject(name: string, blob: Blob, metadata?: { width?: number; height?: number; layerCount?: number }) {
+  async function addEditorProject(
+    name: string, 
+    blob: Blob, 
+    metadata?: { width?: number; height?: number; layerCount?: number },
+    thumbnailDataUrl?: string
+  ) {
     if (!db) await initDB();
     const id = `editor-${Date.now()}`;
     const fullItem: HistoryItem = {
@@ -179,11 +184,119 @@ export const useHistoryStore = defineStore("history", () => {
     await db!.put(STORE_NAME, fullItem);
     await db!.put(BLOB_STORE, blob, fullItem.id);
 
-    // Generate thumbnail from canvas preview if needed
-    // For now, we'll skip thumbnail generation for editor projects
+    // Generate thumbnail from data URL if provided
+    if (thumbnailDataUrl) {
+      try {
+        const thumbBlob = await generateThumbnailFromDataUrl(thumbnailDataUrl);
+        if (thumbBlob) {
+          await db!.put(THUMB_STORE, thumbBlob, fullItem.id);
+        }
+      } catch (error) {
+        console.error("Failed to generate thumbnail for editor project:", error);
+      }
+    }
     
     items.value.unshift(fullItem);
     return id;
+  }
+
+  async function updateEditorProject(
+    id: string,
+    name: string, 
+    blob: Blob, 
+    metadata?: { width?: number; height?: number; layerCount?: number },
+    thumbnailDataUrl?: string
+  ) {
+    if (!db) await initDB();
+    
+    // Find existing item
+    const existingItem = items.value.find(item => item.id === id);
+    if (!existingItem) {
+      throw new Error("Project not found");
+    }
+
+    const updatedItem: HistoryItem = {
+      ...existingItem,
+      params: {
+        name,
+        ...metadata,
+      },
+      timestamp: new Date(),
+    };
+
+    await db!.put(STORE_NAME, updatedItem);
+    await db!.put(BLOB_STORE, blob, id);
+
+    // Generate thumbnail from data URL if provided
+    if (thumbnailDataUrl) {
+      try {
+        const thumbBlob = await generateThumbnailFromDataUrl(thumbnailDataUrl);
+        if (thumbBlob) {
+          await db!.put(THUMB_STORE, thumbBlob, id);
+        }
+      } catch (error) {
+        console.error("Failed to generate thumbnail for editor project:", error);
+      }
+    }
+    
+    // Update in items array
+    const index = items.value.findIndex(item => item.id === id);
+    if (index !== -1) {
+      items.value[index] = updatedItem;
+    }
+    
+    return id;
+  }
+
+  async function generateThumbnailFromDataUrl(dataUrl: string): Promise<Blob | null> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            console.error('Failed to get 2D context');
+            resolve(null);
+            return;
+          }
+          canvas.width = 256;
+          canvas.height = 256;
+          
+          // Calculate crop for center square
+          const aspect = img.width / img.height;
+          let sw, sh, sx, sy;
+          if (aspect > 1) {
+            sw = img.height;
+            sh = img.height;
+            sx = (img.width - sw) / 2;
+            sy = 0;
+          } else {
+            sw = img.width;
+            sh = img.width;
+            sx = 0;
+            sy = (img.height - sh) / 2;
+          }
+          
+          // Fill background with white
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, 256, 256);
+          
+          ctx.drawImage(img, sx, sy, sw, sh, 0, 0, 256, 256);
+          
+          canvas.toBlob((blob) => resolve(blob), 'image/webp', 0.8);
+        } catch (error) {
+          console.error('Error processing thumbnail:', error);
+          resolve(null);
+        }
+      };
+      img.onerror = (e) => {
+        console.error('Failed to load image for thumbnail:', e);
+        resolve(null);
+      };
+      img.src = dataUrl;
+    });
   }
 
   function clearSession() {
@@ -408,6 +521,7 @@ export const useHistoryStore = defineStore("history", () => {
     sessionItems,
     addItem,
     addEditorProject,
+    updateEditorProject,
     getBlob,
     getThumbnail,
     removeItem,
@@ -421,5 +535,6 @@ export const useHistoryStore = defineStore("history", () => {
     clearSession,
     migrateTimestamps,
     migrateModes,
+    generateThumbnailFromDataUrl,
   };
 });

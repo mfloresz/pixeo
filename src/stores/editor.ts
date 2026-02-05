@@ -3,6 +3,8 @@ import { defineStore } from "pinia";
 import type { EditorLayer, EditorLayerType, EditorTemplate, EditorProject, SidebarTool } from "../types";
 import { useHistoryStore } from "./history";
 
+const AUTO_SAVE_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+
 // Predefined templates
 const templates: EditorTemplate[] = [
   { id: "instagram-post", name: "Instagram Post", width: 1080, height: 1080, category: "Social", icon: "square" },
@@ -326,7 +328,7 @@ export const useEditorStore = defineStore("editor", () => {
     historyIndex.value = 0;
   }
   
-  async function saveToLibrary() {
+  async function saveToLibrary(thumbnailDataUrl?: string) {
     const historyStore = useHistoryStore();
     const project = exportProject();
     
@@ -334,12 +336,31 @@ export const useEditorStore = defineStore("editor", () => {
     const projectJson = JSON.stringify(project);
     const blob = new Blob([projectJson], { type: "application/json" });
     
-    // Save to history store with type "editor-project"
-    await historyStore.addEditorProject(project.name, blob, {
-      width: project.width,
-      height: project.height,
-      layerCount: project.layers.length,
-    });
+    // Check if this is an existing project (loaded from library)
+    const existingProjectId = currentProject.value?.id;
+    const existingItem = existingProjectId ? historyStore.items.find(item => item.id === existingProjectId) : null;
+    
+    if (existingItem && existingItem.mode === "editor-project") {
+      // Update existing project
+      await historyStore.updateEditorProject(existingProjectId!, project.name, blob, {
+        width: project.width,
+        height: project.height,
+        layerCount: project.layers.length,
+      }, thumbnailDataUrl);
+    } else {
+      // Save as new project
+      const newId = await historyStore.addEditorProject(project.name, blob, {
+        width: project.width,
+        height: project.height,
+        layerCount: project.layers.length,
+      }, thumbnailDataUrl);
+      
+      // Update current project with the new ID
+      currentProject.value = {
+        ...project,
+        id: newId,
+      };
+    }
     
     return project.id;
   }
@@ -358,6 +379,34 @@ export const useEditorStore = defineStore("editor", () => {
     layerCounter.value = 1;
   }
   
+  // Track if project has unsaved changes
+  const hasUnsavedChanges = ref(false);
+  let autoSaveInterval: ReturnType<typeof setInterval> | null = null;
+  let autoSaveCallback: ((() => Promise<void>) | null) = null;
+
+  function startAutoSave(saveCallback: () => Promise<void>) {
+    stopAutoSave();
+    autoSaveCallback = saveCallback;
+    autoSaveInterval = setInterval(async () => {
+      if (hasUnsavedChanges.value && autoSaveCallback) {
+        await autoSaveCallback();
+        hasUnsavedChanges.value = false;
+      }
+    }, AUTO_SAVE_INTERVAL);
+  }
+
+  function stopAutoSave() {
+    if (autoSaveInterval) {
+      clearInterval(autoSaveInterval);
+      autoSaveInterval = null;
+    }
+    autoSaveCallback = null;
+  }
+
+  function markAsChanged() {
+    hasUnsavedChanges.value = true;
+  }
+
   // Initialize with empty state
   initNewProject();
   
@@ -560,5 +609,9 @@ export const useEditorStore = defineStore("editor", () => {
     selectGroupChild,
     updateGroupChild,
     ungroup,
+    hasUnsavedChanges,
+    startAutoSave,
+    stopAutoSave,
+    markAsChanged,
   };
 });
