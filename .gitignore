@@ -27,3 +27,4 @@ nul
 package-lock.json
 *.lock
 *-lock.json
+bun.lock
