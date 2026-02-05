@@ -442,13 +442,27 @@ async function handleSvgUpload(event: Event) {
         continue;
       }
       
-      const svgElement = svgDoc.querySelector('svg');
-      if (!svgElement) continue;
-      
-      // Extract all paths and shapes from SVG
+      const svg = svgDoc.querySelector('svg');
+      if (!svg) continue;
+
       const children: any[] = [];
-      let childIndex = 0;
+      let width = 100;
+      let height = 100;
       
+      // Try to get dimensions from viewBox
+      const viewBox = svg.getAttribute('viewBox');
+      if (viewBox) {
+        const parts = viewBox.split(/\s+|,/).map(parseFloat);
+        if (parts.length === 4) {
+          width = parts[2];
+          height = parts[3];
+        }
+      }
+      
+      // Fallback to width/height attributes
+      if (svg.getAttribute('width')) width = parseFloat(svg.getAttribute('width')!);
+      if (svg.getAttribute('height')) height = parseFloat(svg.getAttribute('height')!);
+
       // Extract paths
       const paths = svgElement.querySelectorAll('path');
       paths.forEach((path, idx) => {
@@ -461,48 +475,12 @@ async function handleSvgUpload(event: Event) {
             fill: path.getAttribute('fill') || '#3b82f6',
             stroke: path.getAttribute('stroke') || '#1e40af',
             strokeWidth: parseFloat(path.getAttribute('stroke-width') || '2'),
-            scaleX: 3,
-            scaleY: 3,
+            scaleX: 1, // Reset scale since we use actual dimensions
+            scaleY: 1,
+            width: width, // Pass full SVG dimensions to help with hit testing
+            height: height,
           });
         }
-      });
-      
-      // Extract circles
-      const circles = svgElement.querySelectorAll('circle');
-      circles.forEach((circle, idx) => {
-        const cx = parseFloat(circle.getAttribute('cx') || '0');
-        const cy = parseFloat(circle.getAttribute('cy') || '0');
-        const r = parseFloat(circle.getAttribute('r') || '50');
-        
-        children.push({
-          type: 'path',
-          name: `Circle ${idx + 1}`,
-          data: `M${cx},${cy-r} A${r},${r} 0 1,1 ${cx},${cy+r} A${r},${r} 0 1,1 ${cx},${cy-r} z`,
-          fill: circle.getAttribute('fill') || '#3b82f6',
-          stroke: circle.getAttribute('stroke') || '#1e40af',
-          strokeWidth: parseFloat(circle.getAttribute('stroke-width') || '2'),
-          scaleX: 1,
-          scaleY: 1,
-        });
-      });
-      
-      // Extract rectangles
-      const rects = svgElement.querySelectorAll('rect');
-      rects.forEach((rect, idx) => {
-        const x = parseFloat(rect.getAttribute('x') || '0');
-        const y = parseFloat(rect.getAttribute('y') || '0');
-        const w = parseFloat(rect.getAttribute('width') || '100');
-        const h = parseFloat(rect.getAttribute('height') || '100');
-        
-        children.push({
-          type: 'rect',
-          name: `Rect ${idx + 1}`,
-          width: w,
-          height: h,
-          fill: rect.getAttribute('fill') || '#3b82f6',
-          stroke: rect.getAttribute('stroke') || '#1e40af',
-          strokeWidth: parseFloat(rect.getAttribute('stroke-width') || '2'),
-        });
       });
       
       // Extract polygons
@@ -517,8 +495,10 @@ async function handleSvgUpload(event: Event) {
             fill: poly.getAttribute('fill') || '#3b82f6',
             stroke: poly.getAttribute('stroke') || '#1e40af',
             strokeWidth: parseFloat(poly.getAttribute('stroke-width') || '2'),
-            scaleX: 3,
-            scaleY: 3,
+            scaleX: 1,
+            scaleY: 1,
+            width: width,
+            height: height,
           });
         }
       });

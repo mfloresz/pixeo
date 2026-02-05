@@ -523,10 +523,17 @@ function getGroupHitRectConfig(layer: EditorLayer) {
         const r = child.radius || child.outerRadius || 60;
         childWidth = r * 2;
         childHeight = r * 2;
-      } else if (child.type === 'path' && child.scaleX) {
-        // Estimate size from scale (assuming 24x24 viewBox)
-        childWidth = 24 * child.scaleX;
-        childHeight = 24 * child.scaleY;
+      } else if (child.type === 'path') {
+        const w = child.width || 0;
+        const h = child.height || 0;
+        if (w && h) {
+           childWidth = w * (child.scaleX || 1);
+           childHeight = h * (child.scaleY || 1);
+        } else {
+           // Fallback estimate
+           childWidth = 24 * (child.scaleX || 1);
+           childHeight = 24 * (child.scaleY || 1);
+        }
         childX = (child.offsetX || 0) + childWidth / 2;
         childY = (child.offsetY || 0) + childHeight / 2;
       }
@@ -576,7 +583,7 @@ function getGroupChildConfig(child: any, parent: EditorLayer) {
     stroke: child.stroke,
     strokeWidth: child.strokeWidth,
     draggable: isEditing,
-    listening: isEditing,
+    listening: true,
   };
 
   if (child.type === 'rect') {
@@ -617,17 +624,13 @@ function handleGroupMouseDown(e: any, layer: EditorLayer) {
     e.cancelBubble = true;
     editorStore.selectLayer(layer.id);
     
-    const node = e.target as Konva.Node;
+    const stage = stageRef.value.getStage() as Konva.Stage;
+    const groupNode = stage.findOne(`#${layer.id}`);
     
-    // Check if we clicked on the hit rect (empty space) or the group itself
-    if (node.getClassName() === 'Rect' && node.fill() === 'transparent') {
-      // Clicked on empty space within group - select the group
-      currentSelectedNode = node.getParent() as Konva.Node;
-    } else {
-      currentSelectedNode = node;
+    if (groupNode) {
+      currentSelectedNode = groupNode;
+      updateTransformer();
     }
-    
-    updateTransformer();
     
     // Setup drag handlers for the group
     if (currentSelectedNode) {
@@ -691,8 +694,8 @@ function handleGroupChildMouseDown(e: any, layer: EditorLayer, child: any) {
     currentSelectedNode = node;
     updateTransformer();
   } else {
-    // Not in edit mode - treat as group click
-    handleGroupMouseDown(e, layer);
+    // Not in edit mode - allow event to bubble to group for dragging
+    return;
   }
 }
 

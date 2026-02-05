@@ -39,6 +39,13 @@ export interface GroupChild {
   text?: string;
   fontSize?: number;
   fontFamily?: string;
+  x?: number;
+  y?: number;
+  scaleX?: number;
+  scaleY?: number;
+  offsetX?: number;
+  offsetY?: number;
+  rotation?: number;
 }
 
 export interface EditorLayer {
