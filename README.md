@@ -19,8 +19,10 @@
 - **Inpaint/Enhance**: Locally enhance and edit images by drawing masks and using AI-powered inpainting with ONNX models in the browser.
 - **Video Generation**: Create videos from text or images with models like Wan2.1 14B Video.
 - **Text to Speech**: Convert text to audio with TTS models like Kokoro and CSM 1B.
+- **Visual Editor (Beta)**: A new graphical editor for creating designs with text, shapes, images, and layers. Save and edit your projects locally.
+  > **Note**: The Visual Editor is currently in **early stages** of development. Some features may be incomplete or subject to change.
 - **Personal Library**: Store and manage all your generated content locally.
-- **Intuitive Interface**: Modern design with four main tabs: Generate/Edit, Inpaint/Enhance, Library, and Settings.
+- **Intuitive Interface**: Modern design with five main tabs: Generate/Edit, Inpaint/Enhance, Editor, Library, and Settings.
 - **Multi-language Support**: Available in Spanish and English.
 - **Local Storage**: Uses IndexedDB to save content without needing a server.
 - **Real-time Notifications**: Receive immediate feedback on your generation progress.
@@ -31,6 +33,7 @@
 - **Image Generation**: ✅ Working
 - **Image Editing**: ✅ Working
 - **Inpaint/Enhance**: ✅ Working
+- **Visual Editor**: 🚧 Early Stages (Beta)
 - **Video Generation**: Not Tested
 - **Text to Speech**: Not Tested
 
@@ -106,6 +109,30 @@ bun run dev
 7. Compare original and enhanced versions with the toggle
 8. Download the enhanced result
 
+### Visual Editor (Beta)
+The Visual Editor allows you to create designs with text, shapes, and images using a graphical interface.
+
+**⚠️ Early Stage Notice**: This feature is actively being developed. Some functionality may be limited or change in future updates.
+
+1. Select the **Editor** tab
+2. Choose a template (Instagram Post, Facebook Post, etc.) or start with a custom canvas
+3. Add elements:
+   - **Text**: Add and edit text with custom fonts and colors
+   - **Shapes**: Create rectangles, circles, stars, arrows, and more
+   - **Images**: Import images to your canvas
+   - **Groups**: Organize elements into groups for easier management
+4. Use the layers panel to manage element ordering
+5. Adjust zoom level for precision work
+6. Export your design as PNG, JPG, or WebP
+7. Save your project to the Library for later editing
+
+**Features in Development**:
+- More shape options and customization
+- Advanced text formatting
+- Image filters and effects
+- Undo/redo functionality
+- Keyboard shortcuts
+
 ### Prompt Optimization
 Some models support automatic prompt optimization through specialized AI experts. When enabled, the original prompt is analyzed and rewritten to enhance visual details, properly handle text content in images, and specify artistic style appropriately.
 
@@ -119,7 +146,8 @@ This feature is available for the following models:
 The optimization configuration is located in `src/config/optimize_prompts.json`.
 
 ### Manage Library
-- The **Library** tab shows all your generated content
+- The **Library** tab shows all your generated content and saved projects
+- View and edit saved editor projects directly from the library
 - Use zoom to view complete details
 - Download content individually
 - Clear the current session with the brush button
@@ -130,6 +158,7 @@ The optimization configuration is located in `src/config/optimize_prompts.json`.
 src/
 ├── components/          # Reusable Vue components
 │   ├── generate/        # Generation components
+│   ├── editor/          # Visual Editor components (Beta)
 │   ├── inpaint/         # Inpaint/enhance components
 │   ├── library/         # Library components
 │   └── settings/        # Settings components
@@ -176,6 +205,8 @@ The application supports Spanish and English. Translation files are located in `
 - **Responsive Design**: Works on desktop and mobile
 - **Dark/Light Theme**: Switch between modes with the button in the top bar
 - **Offline Storage**: Works without internet connection (except for generating content)
+- **Visual Editor**: Graphical design tool with layers, templates, and export options (Beta)
+- **Auto-save**: Editor projects are automatically saved every 5 minutes with thumbnail generation
 - **Quota Management**: Monitor your API usage in real-time
 - **Detailed Logging**: Log all operations in settings
 
