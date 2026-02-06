@@ -98,13 +98,13 @@
     <!-- Placeholder when no generations -->
     <div v-else class="text-center text-muted-foreground p-12">
         <div
-            class="w-20 h-20 bg-muted/50 rounded-3xl flex items-center justify-center mx-auto mb-6"
+            class="w-20 h-20 flex items-center justify-center mx-auto mb-6"
         >
-            <Sparkles class="w-10 h-10 opacity-20" />
+            <img src="/symbol.svg" class="w-full h-full" alt="Pixeo" />
         </div>
-        <h2 class="text-2xl font-bold text-foreground mb-2">
-            {{ $t("generate.heroTitle") }}
-        </h2>
+        <div class="flex justify-center">
+            <img src="/name.svg" class="h-12" alt="Pixeo Studio" />
+        </div>
     </div>
 </template>
 

@@ -10,7 +10,7 @@
                 class="container flex h-16 items-center justify-between px-4 md:px-8"
             >
                 <div class="flex items-center gap-2">
-                    <span class="text-xl font-bold tracking-tight">Pixeo</span>
+                    <img src="/name.svg" class="h-6" alt="Pixeo" />
                 </div>
 
                 <nav class="flex items-center gap-1 bg-muted/50 p-1 rounded-xl">
