@@ -151,9 +151,9 @@ onMounted(() => {
 
 async function loadThumbnail() {
   if (thumbLoaded.value) return;
-  const blob = await historyStore.getThumbnail(props.item.id);
-  if (blob) {
-    thumbUrl.value = URL.createObjectURL(blob);
+  const url = await historyStore.getThumbnailUrl(props.item.id);
+  if (url) {
+    thumbUrl.value = url;
     thumbLoaded.value = true;
   }
 }
@@ -168,7 +168,6 @@ async function loadFullBlob() {
 }
 
 onUnmounted(() => {
-  if (thumbUrl.value) URL.revokeObjectURL(thumbUrl.value);
   if (fullBlobUrl.value) URL.revokeObjectURL(fullBlobUrl.value);
 });
 </script>

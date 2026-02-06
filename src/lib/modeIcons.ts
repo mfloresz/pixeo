@@ -56,7 +56,7 @@ const modeConfigMap: Record<string, ModeConfig> = {
     labelKey: "modes.image2video",
     defaultLabel: "Imagen a video",
   },
-  editor: {
+  "editor-project": {
     icon: PencilRuler,
     labelKey: "modes.editor",
     defaultLabel: "Editor",

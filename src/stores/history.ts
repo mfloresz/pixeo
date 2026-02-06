@@ -15,6 +15,7 @@ export const useHistoryStore = defineStore("history", () => {
   let db: IDBPDatabase | null = null;
   const blobCache = new Map<string, Blob>();
   const thumbCache = new Map<string, Blob>();
+  const thumbUrlCache = new Map<string, string>();
   const CACHE_MAX_SIZE = 50;
 
   async function generateThumbnail(blob: Blob, type: string): Promise<Blob | null> {
@@ -336,11 +337,30 @@ export const useHistoryStore = defineStore("history", () => {
         const firstKey = thumbCache.keys().next().value;
         if (firstKey) {
           thumbCache.delete(firstKey);
+          const url = thumbUrlCache.get(firstKey);
+          if (url) {
+            URL.revokeObjectURL(url);
+            thumbUrlCache.delete(firstKey);
+          }
         }
       }
       thumbCache.set(id, thumb);
     }
     return thumb;
+  }
+
+  async function getThumbnailUrl(id: string): Promise<string | null> {
+    if (thumbUrlCache.has(id)) {
+      return thumbUrlCache.get(id)!;
+    }
+
+    const blob = await getThumbnail(id);
+    if (blob) {
+      const url = URL.createObjectURL(blob);
+      thumbUrlCache.set(id, url);
+      return url;
+    }
+    return null;
   }
 
   async function removeItem(id: string) {
@@ -350,6 +370,11 @@ export const useHistoryStore = defineStore("history", () => {
     await db!.delete(THUMB_STORE, id);
     blobCache.delete(id);
     thumbCache.delete(id);
+    const url = thumbUrlCache.get(id);
+    if (url) {
+      URL.revokeObjectURL(url);
+      thumbUrlCache.delete(id);
+    }
     items.value = items.value.filter((i) => i.id !== id);
   }
 
@@ -361,6 +386,8 @@ export const useHistoryStore = defineStore("history", () => {
     items.value = [];
     blobCache.clear();
     thumbCache.clear();
+    thumbUrlCache.forEach(url => URL.revokeObjectURL(url));
+    thumbUrlCache.clear();
   }
 
   async function clearOrphanedThumbnails() {
@@ -371,6 +398,11 @@ export const useHistoryStore = defineStore("history", () => {
       if (!allItemIds.includes(key as string)) {
         await db!.delete(THUMB_STORE, key);
         thumbCache.delete(key as string);
+        const url = thumbUrlCache.get(key as string);
+        if (url) {
+          URL.revokeObjectURL(url);
+          thumbUrlCache.delete(key as string);
+        }
       }
     }
   }
@@ -524,6 +556,7 @@ export const useHistoryStore = defineStore("history", () => {
     updateEditorProject,
     getBlob,
     getThumbnail,
+    getThumbnailUrl,
     removeItem,
     clearAll,
     clearOrphanedThumbnails,

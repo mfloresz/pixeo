@@ -158,26 +158,21 @@
                             </AlertDialog>
                         </div>
                     </div>
+                    <VirtualLibraryGrid
+                        v-if="items.length > 0"
+                        :items="items"
+                        @zoom="openZoom"
+                    />
                     <div
-                        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+                        v-else
+                        class="py-20 text-center text-muted-foreground"
                     >
-                        <LibraryItem
-                            v-for="item in items"
-                            :key="item.id"
-                            :item="item"
-                            @zoom="openZoom"
-                        />
                         <div
-                            v-if="items.length === 0"
-                            class="col-span-full py-20 text-center text-muted-foreground"
+                            class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4"
                         >
-                            <div
-                                class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4"
-                            >
-                                <Library class="w-8 h-8 opacity-20" />
-                            </div>
-                            {{ $t("library.empty") }}
+                            <Library class="w-8 h-8 opacity-20" />
                         </div>
+                        {{ $t("library.empty") }}
                     </div>
                 </div>
 
@@ -222,6 +217,7 @@ import type { HistoryItem } from "./types";
 import PromptInput from "./components/generate/PromptInput.vue";
 import SettingsView from "./components/settings/SettingsView.vue";
 import LibraryItem from "./components/library/LibraryItem.vue";
+import VirtualLibraryGrid from "./components/library/VirtualLibraryGrid.vue";
 import ZoomModal from "./components/zoom/ZoomModal.vue";
 import GenerationHistory from "./components/generate/GenerationHistory.vue";
 import InpaintView from "./components/inpaint/InpaintView.vue";
