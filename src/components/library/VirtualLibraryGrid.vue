@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-import { useIntersectionObserver } from '@vueuse/core';
+import { useIntersectionObserver, useResizeObserver } from '@vueuse/core';
 import LibraryItem from './LibraryItem.vue';
 import type { HistoryItem } from '../../types';
 
@@ -48,38 +48,43 @@ const OVERSCAN = 3; // Número de items adicionales a renderizar arriba y abajo
 
 const scrollTop = ref(0);
 const containerHeight = ref(0);
+const itemsPerRow = ref(2);
+
+// Actualizar itemsPerRow solo cuando cambia el tamaño de la ventana
+useResizeObserver(containerRef, () => {
+  if (containerRef.value) {
+    const width = containerRef.value.clientWidth;
+    if (width >= 1280) {
+      itemsPerRow.value = 5; // xl
+    } else if (width >= 1024) {
+      itemsPerRow.value = 4; // lg
+    } else if (width >= 768) {
+      itemsPerRow.value = 3; // md
+    } else {
+      itemsPerRow.value = 2; // sm
+    }
+  }
+});
 
 const totalHeight = computed(() => {
-  const itemsPerRow = getItemsPerRow();
-  const rows = Math.ceil(props.items.length / itemsPerRow);
+  const rows = Math.ceil(props.items.length / itemsPerRow.value);
   return rows * ITEM_HEIGHT;
 });
 
 const offsetY = computed(() => {
-  const itemsPerRow = getItemsPerRow();
   const startRow = Math.floor(scrollTop.value / ITEM_HEIGHT);
   return startRow * ITEM_HEIGHT;
 });
 
-const getItemsPerRow = () => {
-  if (!containerRef.value) return 2;
-  const width = containerRef.value.clientWidth;
-  if (width >= 1280) return 5; // xl
-  if (width >= 1024) return 4; // lg
-  if (width >= 768) return 3; // md
-  return 2; // sm
-};
-
 const visibleItems = computed(() => {
-  const itemsPerRow = getItemsPerRow();
   const startRow = Math.max(0, Math.floor(scrollTop.value / ITEM_HEIGHT) - OVERSCAN);
   const endRow = Math.min(
     Math.ceil((scrollTop.value + containerHeight.value) / ITEM_HEIGHT) + OVERSCAN,
-    Math.ceil(props.items.length / itemsPerRow)
+    Math.ceil(props.items.length / itemsPerRow.value)
   );
 
-  const startIndex = startRow * itemsPerRow;
-  const endIndex = Math.min(endRow * itemsPerRow, props.items.length);
+  const startIndex = startRow * itemsPerRow.value;
+  const endIndex = Math.min(endRow * itemsPerRow.value, props.items.length);
 
   return props.items.slice(startIndex, endIndex);
 });

@@ -324,6 +324,14 @@ export const useHistoryStore = defineStore("history", () => {
     return blob;
   }
 
+  function revokeUrl(id: string) {
+    const url = thumbUrlCache.get(id);
+    if (url) {
+      URL.revokeObjectURL(url);
+      thumbUrlCache.delete(id);
+    }
+  }
+
   async function getThumbnail(id: string): Promise<Blob | null> {
     if (!db) await initDB();
 
@@ -337,11 +345,7 @@ export const useHistoryStore = defineStore("history", () => {
         const firstKey = thumbCache.keys().next().value;
         if (firstKey) {
           thumbCache.delete(firstKey);
-          const url = thumbUrlCache.get(firstKey);
-          if (url) {
-            URL.revokeObjectURL(url);
-            thumbUrlCache.delete(firstKey);
-          }
+          revokeUrl(firstKey);
         }
       }
       thumbCache.set(id, thumb);
@@ -370,11 +374,7 @@ export const useHistoryStore = defineStore("history", () => {
     await db!.delete(THUMB_STORE, id);
     blobCache.delete(id);
     thumbCache.delete(id);
-    const url = thumbUrlCache.get(id);
-    if (url) {
-      URL.revokeObjectURL(url);
-      thumbUrlCache.delete(id);
-    }
+    revokeUrl(id);
     items.value = items.value.filter((i) => i.id !== id);
   }
 
