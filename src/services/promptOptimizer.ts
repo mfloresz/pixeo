@@ -1,4 +1,5 @@
 import optimizePrompts from "../config/optimize_prompts.json";
+import { extractErrorMessage } from "../lib/errorHandler";
 
 const OPTIMIZE_ENDPOINT = "https://llm.chutes.ai/v1/chat/completions";
 const OPTIMIZE_MODEL = "chutesai/Mistral-Small-3.2-24B-Instruct-2506";
@@ -39,7 +40,7 @@ export async function optimizePrompt(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Optimization failed: ${response.status} - ${errorText}`);
+    throw new Error(extractErrorMessage(errorText));
   }
 
   const data = await response.json();

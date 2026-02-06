@@ -381,6 +381,7 @@ import { ChutesService } from "../../services/chutes";
 import { optimizePrompt as optimizePromptService } from "../../services/promptOptimizer";
 import { toast } from "vue-sonner";
 import { sanitizeBase64 } from "../../lib/utils";
+import { extractErrorMessage } from "../../lib/errorHandler";
 import { i18n } from "../../i18n";
 import { Switch } from "../ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -543,9 +544,7 @@ async function translatePrompt() {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(
-                `Translation failed: ${response.status} - ${errorText}`,
-            );
+            throw new Error(extractErrorMessage(errorText));
         }
 
         const data = await response.json();
@@ -556,7 +555,7 @@ async function translatePrompt() {
         toast.success(i18n.global.t("logs.translationSuccess"));
     } catch (err: any) {
         console.error(err);
-        toast.error(`Error: ${err.message}`);
+        toast.error(extractErrorMessage(err));
     } finally {
         isTranslating.value = false;
     }
@@ -683,17 +682,7 @@ async function generate() {
         configStore.refreshQuota();
     } catch (err: any) {
         console.error(err);
-        let errorMessage = err.message;
-        try {
-            const match = err.message.match(/API Error: \d+ - (.+)/);
-            if (match && match[1]) {
-                const jsonPart = JSON.parse(match[1]);
-                if (jsonPart.detail) {
-                    errorMessage = jsonPart.detail;
-                }
-            }
-        } catch {}
-        toast.error(errorMessage);
+        toast.error(extractErrorMessage(err));
         configStore.addLog({
             type: mode.value,
             message: `Error: ${err.message}`,

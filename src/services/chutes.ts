@@ -1,4 +1,6 @@
 // src/services/chutes.ts
+import { extractErrorMessage } from '../lib/errorHandler';
+
 export class ChutesService {
     private apiKey: string;
 
@@ -10,7 +12,10 @@ export class ChutesService {
         const resp = await fetch('https://api.chutes.ai/users/me/quota_usage/me', {
             headers: { 'Authorization': `Bearer ${this.apiKey}` }
         });
-        if (!resp.ok) throw new Error('Failed to fetch quota');
+        if (!resp.ok) {
+            const errorText = await resp.text();
+            throw new Error(extractErrorMessage(errorText));
+        }
         return await resp.json();
     }
 
@@ -26,7 +31,7 @@ export class ChutesService {
 
         if (!resp.ok) {
             const errorText = await resp.text();
-            throw new Error(`API Error: ${resp.status} - ${errorText}`);
+            throw new Error(extractErrorMessage(errorText));
         }
 
         return await resp.blob();
