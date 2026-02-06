@@ -1,6 +1,6 @@
 <template>
   <TooltipProvider>
-  <div class="group relative bg-muted/30 rounded-2xl overflow-hidden border hover:border-primary/50 transition-all shadow-sm hover:shadow-xl hover:shadow-primary/5" style="content-visibility: auto; contain-intrinsic-size: 0 250px;">
+  <div class="group relative bg-muted/30 rounded-xl overflow-hidden border hover:border-primary/50 transition-all shadow-sm hover:shadow-xl hover:shadow-primary/5" style="content-visibility: auto; contain-intrinsic-size: 0 200px;">
     <div ref="itemRef" class="aspect-square bg-muted flex items-center justify-center relative overflow-hidden">
       <template v-if="isVisible && thumbUrl">
         <img v-if="item.type === 'image'" :src="thumbUrl" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" decoding="async" />
@@ -58,14 +58,6 @@
           <p>{{ modeTooltipLabel }}</p>
         </TooltipContent>
       </Tooltip>
-    </div>
-    
-    <div class="p-3 space-y-1">
-      <div class="flex items-center justify-between">
-        <span class="text-[10px] font-bold uppercase text-muted-foreground tracking-tighter">{{ item.model }}</span>
-        <span class="text-[10px] text-muted-foreground">{{ formatDate(item.timestamp) }}</span>
-      </div>
-      <p class="text-xs line-clamp-1 italic text-foreground/80">{{ item.params.prompt }}</p>
     </div>
   </div>
   </TooltipProvider>
